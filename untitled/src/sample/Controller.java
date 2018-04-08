@@ -1,16 +1,16 @@
 package sample;
 
-import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 
 import java.io.File;
 
@@ -20,6 +20,7 @@ public class Controller{
     @FXML private MenuItem openProjectMenu;
 
     @FXML private TabPane tabPane;
+    @FXML private AnchorPane rightSidePanel;
 
     //Ordnersymbol der Projekts
     private final Node rootProjectImg = new ImageView(
@@ -33,8 +34,8 @@ public class Controller{
      */
     public void handleNewProject() {
         Tab tab = new CustomTab("new.xml");
-        tab.setClosable(true);
 
+        tab.setClosable(true);
         tabPane.getTabs().add(tab);
     }
 
@@ -44,7 +45,6 @@ public class Controller{
      * auf der linken Seite aktualisiert wird.
      */
     public void handleOpenProject() {
-        projectTreeView = new TreeView<String>();
         DirectoryChooser dc = new DirectoryChooser();
         dc.setInitialDirectory(new File(System.getProperty("user.home")));
         File choice = dc.showDialog(openProjectMenu.getParentPopup().getScene().getWindow());
@@ -60,6 +60,28 @@ public class Controller{
         }
 
     }
+
+    public void handleMouseClicked() {
+        rightSidePanel.setOnMouseClicked((event) -> {
+                if(event.getButton() == MouseButton.SECONDARY) {
+                    //Rectangle rect = new Rectangle(50,30);
+                    //rightSidePanel.getChildren().add(rect);
+                    ContextMenu menu = new ContextMenu();
+                    MenuItem item = new MenuItem("Neuer Knoten");
+                    item.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            DraggableNode node = new DraggableNode();
+                            rightSidePanel.getChildren().add(node);
+                        }
+                    });
+                    menu.getItems().addAll();
+                    menu.show(rightSidePanel, event.getScreenX(), event.getSceneY());
+
+                }});
+
+    }
+
 
     public TreeItem<String> getNodesForDirectory(File directory) { //Returns a TreeItem representation of the specified directory
         TreeItem<String> root = new TreeItem<String>(directory.getName());
