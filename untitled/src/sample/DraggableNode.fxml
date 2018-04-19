@@ -1,36 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="dragableNode" prefHeight="70.0" prefWidth="80.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.DraggableNode">
+<fx:root fx:id="dragableNode" prefHeight="51.0" prefWidth="90.0" styleClass="dragicon" stylesheets="@style.css" type="javafx.scene.layout.AnchorPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <GridPane prefHeight="23.0" prefWidth="80.0" styleClass="node-overlay">
+      <VBox prefHeight="50.0" prefWidth="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <GridPane prefHeight="30.0" prefWidth="80.0" styleClass="node-overlay">
             <columnConstraints>
-               <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
-               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="20.0" />
+               <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="57.0" minWidth="17.0" prefWidth="17.0" />
+               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="65.0" minWidth="25.0" prefWidth="56.0" />
+               <ColumnConstraints maxWidth="17.0" minWidth="13.0" prefWidth="17.0" />
             </columnConstraints>
             <rowConstraints>
+               <RowConstraints />
                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-               <Label fx:id="nodeLabel" alignment="CENTER" onDragDetected="#handleDragDetected" text="Label" />
-               <Label fx:id="deleteNodeLabel" alignment="TOP_RIGHT" onMouseClicked="#handleNodeClosed" text="X" textAlignment="RIGHT" GridPane.columnIndex="1" />
+               <Label fx:id="moveNodeLabel" text="≡" GridPane.rowIndex="1">
+                  <font>
+                     <Font size="17.0" />
+                  </font></Label>
+               <TextField fx:id="nodeLabel" accessibleRole="TEXT" alignment="CENTER" prefHeight="39.0" prefWidth="56.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               <Label fx:id="deleteNodeLabel" alignment="TOP_RIGHT" prefHeight="17.0" prefWidth="13.0" text="X" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+               
             </children>
          </GridPane>
-         <HBox prefHeight="60.0" prefWidth="80.0">
+         <HBox prefHeight="21.0" prefWidth="90.0" styleClass="icon-blue">
             <children>
-               <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" />
-               <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />
-               <AnchorPane maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" />
+               <AnchorPane fx:id="leftDragPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="left-link-handle" />
+               <AnchorPane fx:id="contentPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />
+               <AnchorPane fx:id="rightDragPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="right-link-handle" />
             </children>
          </HBox>
       </VBox>
    </children>
-</AnchorPane>
+</fx:root>

@@ -1,5 +1,7 @@
 .dragicon {
 	-fx-background-radius: 10;
+	-fx-background-color: rgb(80,200,240);
+    -fx-background-radius: 10 10 10 10;
 }
 
 .node-overlay {
@@ -22,5 +24,7 @@
 }
 
 .icon-blue {
-	-fx-background-color: blue;
+	-fx-background-color: rgb(80,200,240);
+	-fx-background-radius: 0 0 10 10;
 }
+

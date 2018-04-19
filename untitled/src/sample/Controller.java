@@ -10,6 +10,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
@@ -21,6 +23,19 @@ public class Controller{
 
     @FXML private TabPane tabPane;
     @FXML private AnchorPane rightSidePanel;
+
+    @FXML private TableView nodeContentTableView;
+
+    public DraggableNode focusedNode;
+
+
+    public Controller(){
+
+    }
+
+    @FXML public void initialize() {
+
+    }
 
     //Ordnersymbol der Projekts
     private final Node rootProjectImg = new ImageView(
