@@ -1,9 +1,12 @@
 package sample;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
@@ -12,9 +15,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
+import javafx.stage.*;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Controller{
 
@@ -48,10 +52,44 @@ public class Controller{
      * der XML geöffnet, sowie das Projektverzeichnis auf der linken Seite aktualisiert
      */
     public void handleNewProject() {
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("newFileDialog.fxml"));
+            //fxmlLoader.setLocation();
+
+            Scene scene = new Scene(fxmlLoader.load(), 320, 110);
+            Stage stage = new Stage();
+            stage.setTitle("New XML File");
+            stage.initStyle(StageStyle.UTILITY);
+            stage.setScene(scene);
+            stage.show();
+
+            NewFileDialog dialogController = fxmlLoader.getController();
+
+            stage.setOnCloseRequest(event -> {
+                String fileText = dialogController.getFileText();
+                // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
+                if(dialogController.isCheckBoxEnabled() &&
+                        !dialogController.getFileText().isEmpty()) {
+
+                }
+                Tab tab = new CustomTab(fileText);
+                tab.setClosable(true);
+                tabPane.getTabs().add(tab);
+
+            });
+
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+
+        }
+
+        /*
         Tab tab = new CustomTab("new.xml");
 
         tab.setClosable(true);
-        tabPane.getTabs().add(tab);
+        tabPane.getTabs().add(tab);*/
     }
 
     /**

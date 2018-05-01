@@ -1,23 +1,35 @@
 package sample;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Side;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
 
 
 public class CustomTab extends Tab{
 
+
     // Merken der Stelle, wo mit Rechtsklick das Menü aufgerufen wurde, um dort dann den neuen Node zu platzieren
-    Point2D point2D = new Point2D(0,0);
+    private Point2D point2D = new Point2D(0,0);
+
+    private static final int offsetX = 100;
+    private static final int offsetY = 60;
+
+    private int height = 0;
+
+    private AnchorPane treeContent;
+
+    // Aus Schema/DTD oder vorhandener xml-Datei definierte Tags speichern
+    private ArrayList xmlNodes = new ArrayList<String>();
 
     public CustomTab(String text) {
         super(text);
@@ -28,31 +40,11 @@ public class CustomTab extends Tab{
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         Tab treeTab = new Tab("Baum");
-        AnchorPane treeContent = new AnchorPane();
+        treeContent = new AnchorPane();
         treeContent.setOnDragDone(event -> {
 
-            DragContainer container =
-                    (DragContainer) event.getDragboard().getContent(DragContainer.AddNode);
-
-            /*if (container != null) {
-                if (container.getValue("scene_coords") != null) {
-
-                        DraggableNode node = new DraggableNode();
-
-                        //node.setType(DragIconType.valueOf(container.getValue("type")));
-                        treeContent.getChildren().add(node);
-
-                        Point2D cursorPoint = container.getValue("scene_coords");
-
-                        node.relocateToPoint(
-                                new Point2D(cursorPoint.getX() - 32, cursorPoint.getY() - 32)
-                        );
-
-                }
-            }*/
-
             //AddLink drag operation
-            container =
+            DragContainer container =
                     (DragContainer) event.getDragboard().getContent(DragContainer.AddLink);
 
             if (container != null) {
@@ -72,7 +64,7 @@ public class CustomTab extends Tab{
                     DraggableNode source = null;
                     DraggableNode target = null;
 
-                    for (Node n: treeContent.getChildren()) {
+                    for (javafx.scene.Node n: treeContent.getChildren()) {
 
                         if (n.getId() == null)
                             continue;
@@ -103,31 +95,6 @@ public class CustomTab extends Tab{
         pane.setRightAnchor(tabPane,0.0);
         pane.setLeftAnchor(tabPane,0.0);
 
-
-        /*treeContent.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if(event.getButton() == MouseButton.SECONDARY) {
-                    ContextMenu menu = new ContextMenu();
-                    MenuItem item = new MenuItem("Neuer Knoten");
-                    item.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event1) {
-                            DraggableNode node = new DraggableNode();
-                            Point2D point = new Point2D(event.getSceneX(), event.getSceneY());
-                            treeContent.getChildren().add(node);
-                            node.relocateToPoint(point);
-                            //TODO neues XML Element erstellen
-                        }
-                    });
-                    menu.getItems().add(item);
-
-                    menu.show(pane, event.getScreenX(), event.getScreenY());
-
-                }
-            }
-        });*/
-
         ContextMenu contextMenu = new ContextMenu();
 
         treeContent.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
@@ -142,20 +109,82 @@ public class CustomTab extends Tab{
 
         MenuItem item = new MenuItem("Neuer Knoten");
         item.setOnAction(event -> {
-                DraggableNode node = new DraggableNode();
-                //Point point = MouseInfo.getPointerInfo().getLocation();
-                treeContent.getChildren().add(node);
 
-                //node.relocateToPoint(new Point2D(point.getX(),point.getY()));
-                node.relocateToPoint(point2D);
+            DraggableNode node = new DraggableNode();
+            node.tabContent=treeContent;
 
-                //TODO neues XML Element erstellen
+            //Point point = MouseInfo.getPointerInfo().getLocation();
+            treeContent.getChildren().add(node);
+
+
+            //node.relocateToPoint(new Point2D(point.getX(),point.getY()));
+            node.relocateToPoint(point2D);
+
+            //TODO neues XML Element erstellen
         });
         contextMenu.getItems().add(item);
+
+        MenuItem item1 = new MenuItem("Testdatei");
+        item1.setOnAction(event -> {
+            XMLBuilder builder = new XMLBuilder();
+            Element root = builder.createTestXML();
+            showXML(root,0);
+        });
+
+        contextMenu.getItems().add(item1);
 
         this.setContent(pane);
 
 
+    }
+
+    private DraggableNode showXML(Element root, int depth) {
+        Node currElement = root;
+        DraggableNode rootDraggableNode = null;
+
+        while(currElement!=null) {
+            Node children = currElement.getFirstChild();
+            NodeList childrenList = currElement.getChildNodes();
+
+            if (currElement instanceof Element){
+                String name = ((Element) currElement).getTagName();
+                System.out.println("Tagname: " + name);
+                DraggableNode dNode = new DraggableNode();
+                dNode.tabContent = treeContent;
+                if(currElement.hasAttributes()) {
+                    // Attribute anfügen als Knoten/in Tabelle?
+                }
+                dNode.setLabel(name);
+
+                treeContent.getChildren().add(dNode);
+
+
+                Point2D point = new Point2D(point2D.getX() + depth*offsetX, point2D.getY() + height*offsetY);
+                height++;
+                dNode.relocateToPoint(point);
+                if(children!=null) {
+
+                    //childrenList.getLength();
+                    rootDraggableNode = showXML((Element) children, depth+1);
+                    NodeLink link = new NodeLink();
+
+                    //link.setStart(new Point2D(dNode.rightDragPane.getLayoutX(),dNode.rightDragPane.getLayoutY()));
+                    //link.setEnd(new Point2D(rootDraggableNode.leftDragPane.getLayoutX(), rootDraggableNode.leftDragPane.getLayoutY()));
+                    link.bindEnds(dNode,rootDraggableNode);
+
+                    treeContent.getChildren().add(0,link);
+                    //link.setVisible(true);
+
+                }
+                else {
+                    rootDraggableNode = dNode;
+                }
+
+
+            }
+            currElement = currElement.getNextSibling(); //nächstes Kind
+        }
+        return rootDraggableNode;
     }
 
 }

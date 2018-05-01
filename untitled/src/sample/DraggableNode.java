@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
@@ -16,6 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.event.EventHandler;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.UUID;
 
 public class DraggableNode extends AnchorPane {
@@ -26,9 +28,9 @@ public class DraggableNode extends AnchorPane {
     @FXML private Label moveNodeLabel;
     @FXML private Label deleteNodeLabel;
 
-    @FXML private AnchorPane leftDragPane;
+    @FXML AnchorPane leftDragPane;
     @FXML private AnchorPane contentPane;
-    @FXML private AnchorPane rightDragPane;
+    @FXML AnchorPane rightDragPane;
 
     private EventHandler <DragEvent> mContextDragOver;
     private EventHandler <DragEvent> mContextDragDropped;
@@ -41,9 +43,10 @@ public class DraggableNode extends AnchorPane {
     private Point2D mDragOffset = new Point2D(0.0,0.0);
 
     private NodeLink mDragLink = null;
-    private AnchorPane tabContent = null;
+    //Parent = Inhalt des Tabs
+    AnchorPane tabContent = null;
 
-    private ArrayList<String> linkedChildren;
+    private ArrayList<String> linkedChildren = new ArrayList<String>();
     private ArrayList<String> linkedAttributes; //nötig?
 
     private DraggableNode parent;
@@ -70,8 +73,8 @@ public class DraggableNode extends AnchorPane {
 
     @FXML public void initialize() {
 
-        //tabContent = (AnchorPane) getParent();
-        parentProperty().addListener(new ChangeListener() {
+        //tabContent = (AnchorPane) self.getParent();
+        /*parentProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable,
@@ -80,7 +83,7 @@ public class DraggableNode extends AnchorPane {
 
             }
 
-        });
+        });*/
 
         setNodeDragHandlers();
         setNodeLinkHandlers();
@@ -90,6 +93,11 @@ public class DraggableNode extends AnchorPane {
 
         leftDragPane.setOnDragDropped(mLinkHandleDragDropped);
         rightDragPane.setOnDragDropped(mLinkHandleDragDropped);
+
+        mDragLink = new NodeLink();
+        mDragLink.setVisible(false);
+
+        //tabContent = (AnchorPane) self.getParent();
 
         dragableNode.setOnMouseClicked(event -> {
             setFocused(true);
@@ -142,7 +150,25 @@ public class DraggableNode extends AnchorPane {
             parent.getChildren().remove(self);
 
             // Verbindungen entfernen
+            for (ListIterator<String> iterId = linkedChildren.listIterator();
+                 iterId.hasNext();) {
 
+                String id = iterId.next();
+
+                for (ListIterator <Node> iterNode = parent.getChildren().listIterator();
+                     iterNode.hasNext();) {
+
+                    Node node = iterNode.next();
+
+                    if (node.getId() == null)
+                        continue;
+
+                    if (node.getId().equals(id))
+                        iterNode.remove();
+                }
+
+                iterId.remove();
+            }
 
         });
 
@@ -298,5 +324,9 @@ public class DraggableNode extends AnchorPane {
 
     public void registerLink(String id) {
         linkedChildren.add(id);
+    }
+
+    public void setLabel(String label) {
+        nodeLabel.setText(label);
     }
 }
