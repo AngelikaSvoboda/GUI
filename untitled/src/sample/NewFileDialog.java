@@ -14,6 +14,8 @@ public class NewFileDialog{
 
     private boolean checkBoxValue = false;
 
+    private boolean windowCancelled = true;
+
     //@FXML AnchorPane rootNewFileDialog;
     @FXML private TextField fileTextField;
 
@@ -36,6 +38,10 @@ public class NewFileDialog{
     public void initialize() {
         checkBoxValue = schemaCheckBox.isSelected();
         selectSchemaButton.setDisable(true);
+
+    }
+    public boolean isWindowCancelled() {
+        return windowCancelled;
     }
 
     public String getFileText() {
@@ -85,22 +91,22 @@ public class NewFileDialog{
     }
 
     public void handleCancel(ActionEvent actionEvent) {
+        windowCancelled=true;
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
 
     public void handleCreateFile(ActionEvent actionEvent) {
+        windowCancelled = false;
         // Schema einlesen und Elemente in das Contextmenu aufnehmen
         if(checkBoxValue) {
 
         }
         // ohne Schema: leeres XML erzeugen, Schema anlegen(?)
-        else {
-            /*
-            Tab tab = new CustomTab("new.xml");
+        else if(!fileTextField.getText().isEmpty()){
 
-            tab.setClosable(true);
-            tabPane.getTabs().add(tab);*/
+            Stage stage = (Stage) cancelButton.getScene().getWindow();
+            stage.close();
 
         }
     }

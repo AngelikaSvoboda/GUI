@@ -66,19 +66,27 @@ public class Controller{
 
             NewFileDialog dialogController = fxmlLoader.getController();
 
-            stage.setOnCloseRequest(event -> {
+            stage.setOnHidden(event -> {
                 String fileText = dialogController.getFileText();
                 // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
                 if(dialogController.isCheckBoxEnabled() &&
                         !dialogController.getFileText().isEmpty()) {
 
                 }
-                Tab tab = new CustomTab(fileText);
-                tab.setClosable(true);
-                tabPane.getTabs().add(tab);
+
+                if(!dialogController.isWindowCancelled()) {
+                    Tab tab = new CustomTab(fileText);
+                    tab.setClosable(true);
+                    tabPane.getTabs().add(tab);
+                }
+                if(event.getSource() instanceof Button) {
+                    Button button = (Button) event.getSource();
+                    if(button.isCancelButton()) {
+                        System.out.println("Abbrechen");
+                    }
+                }
 
             });
-
         }
         catch (IOException e) {
             e.printStackTrace();
