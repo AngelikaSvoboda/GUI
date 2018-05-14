@@ -2,34 +2,80 @@ package sample;
 
 
 import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
+import com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory;
 import com.sun.org.apache.xerces.internal.xs.XSLoader;
 import com.sun.org.apache.xerces.internal.xs.XSModel;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.xml.sax.SAXException;
 
+import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.validation.SchemaFactory;
 import java.io.File;
+import java.io.IOException;
 
 public class XMLBuilder {
+
+    private DocumentBuilderFactory dbFactory;
+    private DocumentBuilder dBuilder;
+
+    SchemaFactory schemaFactory;
 
     private Document document;
     private Element root;
 
 
     public XMLBuilder(){
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setIgnoringComments(true);
+        dbFactory.setIgnoringElementContentWhitespace(true);
+
         try {
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            dBuilder = dbFactory.newDocumentBuilder();
             document = dBuilder.newDocument();
 
 
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
+    }
+
+    public XMLBuilder(File schema){
+        this();
+        dbFactory.setValidating(true);
+        //dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaLanguage","http://www.w3.org/2001/XMLSchema");
+
+        //dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaSource", schema.getAbsolutePath());
+
+        try {
+            dBuilder = dbFactory.newDocumentBuilder();
+
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Element getRoot() {
+        return root;
+    }
+
+    public Element readFile(File file) {
+        try {
+            Document document = dBuilder.parse(file);
+            document.getDocumentElement().normalize();
+            root = (Element) document.getFirstChild();
+            return root;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public boolean validateSchema(File inputSchema) {

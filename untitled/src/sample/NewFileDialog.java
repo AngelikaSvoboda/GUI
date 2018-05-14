@@ -105,9 +105,9 @@ public class NewFileDialog{
         // ohne Schema: leeres XML erzeugen, Schema anlegen(?)
         else if(!fileTextField.getText().isEmpty()){
 
-            Stage stage = (Stage) cancelButton.getScene().getWindow();
-            stage.close();
 
         }
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
+        stage.close();
     }
 }

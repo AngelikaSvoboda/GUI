@@ -5,6 +5,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -21,6 +22,7 @@
                     </items>
                   </Menu>
                   <MenuItem fx:id="openProjectMenu" mnemonicParsing="false" onAction="#handleOpenProject" text="Öffne..." />
+                  <MenuItem fx:id="openFileMenu" mnemonicParsing="false" onAction="#handleOpenFile" text="Öffne XML" />
                   <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
@@ -62,7 +64,11 @@
                         </AnchorPane>
                       <AnchorPane fx:id="rightSidePanel" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleMouseClicked" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
                            <children>
-                              <TableView fx:id="nodeContentTableView" layoutX="12.0" layoutY="59.0" prefHeight="181.0" prefWidth="141.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <TableView fx:id="nodeContentTableView" disable="true" layoutX="12.0" layoutY="59.0" prefHeight="181.0" prefWidth="141.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <columns>
+                                    <TableColumn prefWidth="58.0" text="Attribute" />
+                                    <TableColumn prefWidth="63.0" text="Value" />
+                                 </columns></TableView>
                            </children></AnchorPane>
                     </items>
                   </SplitPane>

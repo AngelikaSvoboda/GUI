@@ -16,7 +16,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.io.IOException;
 
@@ -24,6 +27,7 @@ public class Controller{
 
     @FXML private TreeView<String> projectTreeView;
     @FXML private MenuItem openProjectMenu;
+    @FXML private MenuItem openFileMenu;
 
     @FXML private TabPane tabPane;
     @FXML private AnchorPane rightSidePanel;
@@ -31,7 +35,6 @@ public class Controller{
     @FXML private TableView nodeContentTableView;
 
     public DraggableNode focusedNode;
-
 
     public Controller(){
 
@@ -68,16 +71,28 @@ public class Controller{
 
             stage.setOnHidden(event -> {
                 String fileText = dialogController.getFileText();
-                // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
-                if(dialogController.isCheckBoxEnabled() &&
-                        !dialogController.getFileText().isEmpty()) {
-
-                }
+                System.out.println(dialogController.isWindowCancelled());
 
                 if(!dialogController.isWindowCancelled()) {
-                    Tab tab = new CustomTab(fileText);
+
+                    System.out.println("Neue Datei");
+                    CustomTab tab = new CustomTab(fileText);
                     tab.setClosable(true);
                     tabPane.getTabs().add(tab);
+
+                    // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
+                    if(dialogController.isCheckBoxEnabled() &&
+                            !dialogController.getFileText().isEmpty()) {
+                        System.out.println("Neue Datei mit Schema");
+                        File schema = new File(dialogController.getSchemaFilePath());
+
+
+                    }
+                    // Ohne Schema
+                    else {
+
+                    }
+
                 }
                 if(event.getSource() instanceof Button) {
                     Button button = (Button) event.getSource();
@@ -92,12 +107,6 @@ public class Controller{
             e.printStackTrace();
 
         }
-
-        /*
-        Tab tab = new CustomTab("new.xml");
-
-        tab.setClosable(true);
-        tabPane.getTabs().add(tab);*/
     }
 
     /**
@@ -117,7 +126,25 @@ public class Controller{
             alert.showAndWait();
         } else {
             projectTreeView.setRoot(getNodesForDirectory(choice));
+            //CustomTab tab = new CustomTab();
 
+        }
+
+    }
+
+    public void handleOpenFile() {
+        FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(new File(System.getProperty("user.home")));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML-File .xml" , "*.xml"));
+        File choice = fc.showOpenDialog(openFileMenu.getParentPopup().getScene().getWindow());
+
+        if(choice != null) {
+            CustomTab tab = new CustomTab(choice.getName());
+            XMLBuilder builder = new XMLBuilder();
+            Element root = builder.readFile(choice);
+
+            tabPane.getTabs().add(tab);
+            tab.showXML(root);
         }
 
     }
