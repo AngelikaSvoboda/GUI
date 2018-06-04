@@ -11,6 +11,11 @@
 
 }
 
+.node-focus {
+    -fx-border-color: blue;
+    -fx-border-radius: 10 10 10 10;
+}
+
 .right-link-handle:hover {
 	-fx-background-radius: 0 0 10 0;
 	-fx-background-color:

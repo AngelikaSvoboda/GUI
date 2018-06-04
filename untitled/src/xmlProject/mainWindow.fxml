@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="xmlProject.Controller">
    <children>
       <MenuBar layoutX="-30.0" AnchorPane.bottomAnchor="375.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <menus>
@@ -23,6 +28,10 @@
                   </Menu>
                   <MenuItem fx:id="openProjectMenu" mnemonicParsing="false" onAction="#handleOpenProject" text="Öffne..." />
                   <MenuItem fx:id="openFileMenu" mnemonicParsing="false" onAction="#handleOpenFile" text="Öffne XML" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="saveMenuButton" mnemonicParsing="false" onAction="#handleSave" text="Speichern" />
+                  <MenuItem fx:id="saveAsButton" mnemonicParsing="false" onAction="#handleSaveAs" text="Speichern unter..." />
+                  <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
@@ -62,14 +71,27 @@
                               <TabPane fx:id="tabPane" prefHeight="370.0" prefWidth="320.0" tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
-                      <AnchorPane fx:id="rightSidePanel" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleMouseClicked" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
+                      <VBox fx:id="rightSidePanel" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleMouseClicked" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
                            <children>
-                              <TableView fx:id="nodeContentTableView" disable="true" layoutX="12.0" layoutY="59.0" prefHeight="181.0" prefWidth="141.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <ToolBar prefHeight="42.0" prefWidth="122.0">
+                                <items>
+                                  <Button fx:id="addAttributeButton" mnemonicParsing="false" onAction="#handleAddAttribute" prefHeight="25.0" prefWidth="25.0" />
+                                    <Button fx:id="editAttributeButton" mnemonicParsing="false" onAction="#handleEditAttribute" prefHeight="25.0" prefWidth="25.0" />
+                                    <Button fx:id="deleteAttributeButton" mnemonicParsing="false" onAction="#handleDeleteAttribute" prefHeight="25.0" prefWidth="25.0" />
+                                </items>
+                              </ToolBar>
+                              <TableView fx:id="nodeContentTableView" editable="true" layoutX="12.0" layoutY="59.0" prefHeight="181.0" prefWidth="141.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
                                  <columns>
-                                    <TableColumn prefWidth="58.0" text="Attribute" />
-                                    <TableColumn prefWidth="63.0" text="Value" />
-                                 </columns></TableView>
-                           </children></AnchorPane>
+                                    <TableColumn fx:id="tableColumnAttribute" maxWidth="1.7976931348623157E308" prefWidth="58.0" sortable="false" text="Attribute" />
+                                    <TableColumn fx:id="tableColumnValue" maxWidth="1.7976931348623157E308" prefWidth="63.0" sortable="false" text="Value" />
+                                 </columns>
+                                  <placeholder>
+                                      <Label text="Wähle ein Element aus" />
+                                  </placeholder>
+
+                              </TableView>
+                           </children>
+                      </VBox>
                     </items>
                   </SplitPane>
                </children>

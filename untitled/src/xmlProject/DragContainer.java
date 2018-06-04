@@ -1,4 +1,4 @@
-package sample;
+package xmlProject;
 
 import javafx.scene.input.DataFormat;
 import javafx.util.Pair;

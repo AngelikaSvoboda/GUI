@@ -1,10 +1,6 @@
-package sample;
+package xmlProject;
 
-import com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
@@ -22,6 +18,8 @@ import java.util.ArrayList;
 
 public class CustomTab extends Tab{
 
+    private Controller mainWindowController;
+
     // Merken der Stelle, wo mit Rechtsklick das Menü aufgerufen wurde, um dort dann den neuen Node zu platzieren
     private Point2D point2D = new Point2D(0,0);
 
@@ -37,8 +35,9 @@ public class CustomTab extends Tab{
     // Aus Schema/DTD oder vorhandener xml-Datei definierte Tags speichern
     private ArrayList xmlNodes = new ArrayList<String>();
 
-    public CustomTab(String text) {
+    public CustomTab(Controller c, String text) {
         super(text);
+        mainWindowController = c;
 
         xmlBuilder = new XMLBuilder();
         System.out.println("new CustomTab");
@@ -148,7 +147,7 @@ public class CustomTab extends Tab{
         MenuItem item = new MenuItem("Neuer Knoten");
         item.setOnAction(event -> {
 
-            DraggableNode node = new DraggableNode();
+            DraggableNode node = new DraggableNode(mainWindowController);
             node.tabContent=treeContent;
 
             //Point point = MouseInfo.getPointerInfo().getLocation();
@@ -166,7 +165,8 @@ public class CustomTab extends Tab{
         item1.setOnAction(event -> {
             XMLBuilder builder = new XMLBuilder();
             Element root = builder.createTestXML();
-            showXML(root,0);
+            //showXML(root,0);
+            showXML(root);
         });
 
         contextMenu.getItems().add(item1);
@@ -176,9 +176,18 @@ public class CustomTab extends Tab{
 
     }
 
-    public CustomTab(String text, File schema) {
-        this(text);
-        xmlBuilder.validateSchema(schema)
+    public CustomTab(Controller c, String text, File file) {
+        this(c, text);
+        //xmlBuilder = new XMLBuilder(file);
+        xmlBuilder.readFile(file);
+    }
+
+    public XMLBuilder getXmlBuilder() {
+        return xmlBuilder;
+    }
+
+    public void setSchema(File schema) {
+        xmlBuilder.setSchema(schema);
     }
 
     public DraggableNode showXML(Element root, int depth) {
@@ -192,7 +201,7 @@ public class CustomTab extends Tab{
             if (currElement instanceof Element){
                 String name = ((Element) currElement).getTagName();
                 System.out.println("Tagname: " + name);
-                DraggableNode dNode = new DraggableNode();
+                DraggableNode dNode = new DraggableNode(mainWindowController);
                 dNode.tabContent = treeContent;
                 if(currElement.hasAttributes()) {
                     // Attribute anfügen als Knoten/in Tabelle?
@@ -235,7 +244,7 @@ public class CustomTab extends Tab{
         if(root!=null) {
             point2D.add(20, 20);
             String label = root.getTagName();
-            DraggableNode node = new DraggableNode();
+            DraggableNode node = new DraggableNode(mainWindowController);
             node.tabContent = treeContent;
             node.setLabel(label);
 
@@ -263,7 +272,7 @@ public class CustomTab extends Tab{
             Node currentNode = list.item(i);
             if(currentNode.getNodeType() == Node.ELEMENT_NODE) {
                 String label = ((Element) currentNode).getTagName();
-                dNode = new DraggableNode();
+                dNode = new DraggableNode(mainWindowController);
                 dNode.tabContent = treeContent;
                 dNode.setLabel(label);
 
@@ -276,7 +285,9 @@ public class CustomTab extends Tab{
                     for(int j=0; j<attributeMap.getLength(); j++) {
                         Node attribute = attributeMap.item(j);
                         String attrName = attribute.getNodeName();
-
+                        String attrValue = attribute.getNodeValue();
+                        //Attribute a = new Attribute();
+                        dNode.tableViewContent.addRow(attrName,attrValue);
 
                     }
                 }

@@ -28,7 +28,7 @@
                   <font>
                      <Font size="17.0" />
                   </font></Label>
-               <TextField fx:id="nodeLabel" accessibleRole="TEXT" alignment="CENTER" prefHeight="39.0" prefWidth="56.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               <TextField fx:id="nodeTextField" accessibleRole="TEXT" alignment="CENTER" prefHeight="39.0" prefWidth="56.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                <Label fx:id="deleteNodeLabel" alignment="TOP_RIGHT" prefHeight="17.0" prefWidth="13.0" text="X" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                
             </children>

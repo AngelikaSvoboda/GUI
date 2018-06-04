@@ -1,4 +1,4 @@
-package sample;
+package xmlProject;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.When;

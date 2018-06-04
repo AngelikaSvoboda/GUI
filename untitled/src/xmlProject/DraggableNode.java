@@ -1,30 +1,27 @@
-package sample;
+package xmlProject;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 
 import javafx.event.EventHandler;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.ListIterator;
-import java.util.UUID;
+import java.util.*;
 
 public class DraggableNode extends AnchorPane {
 
+    private Controller mainWindowController;
+
     @FXML private AnchorPane dragableNode;
 
-    @FXML private TextField nodeLabel;
+    // Name des Elements
+    @FXML private TextField nodeTextField;
+
     @FXML private Label moveNodeLabel;
     @FXML private Label deleteNodeLabel;
 
@@ -32,11 +29,16 @@ public class DraggableNode extends AnchorPane {
     @FXML private AnchorPane contentPane;
     @FXML AnchorPane rightDragPane;
 
+    // Bewegen der Knoten innerhalb des Tabs
     private EventHandler <DragEvent> mContextDragOver;
     private EventHandler <DragEvent> mContextDragDropped;
 
+    // Verbindung ziehen startet -> Unterschied zw. leftDragPane und rightDragPane
     private EventHandler <MouseEvent> mLinkHandleDragDetected;
+    // Verbindung losgelassen
     private EventHandler <DragEvent> mLinkHandleDragDropped;
+
+    // Verbindung zu einem Knoten gezogen
     private EventHandler <DragEvent> mContextLinkDragOver;
     private EventHandler <DragEvent> mContextLinkDragDropped;
 
@@ -46,14 +48,20 @@ public class DraggableNode extends AnchorPane {
     //Parent = Inhalt des Tabs
     AnchorPane tabContent = null;
 
-    private ArrayList<String> linkedChildren = new ArrayList<String>();
-    private ArrayList<String> linkedAttributes; //nötig?
+    ArrayList<String>linkedChildren = new ArrayList<>();
+    ArrayList<String>linkedAttributes = new ArrayList<>(); //nötig?
 
+    // Referenz auf Elternknoten wenn vorhanden
     private DraggableNode parent;
+
+    TableViewContent tableViewContent = new TableViewContent();
+
 
     private final DraggableNode self;
 
-    public DraggableNode() {
+    public DraggableNode(Controller c) {
+
+        mainWindowController = c;
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("DraggableNode.fxml"));
         fxmlLoader.setRoot(this);
@@ -72,37 +80,38 @@ public class DraggableNode extends AnchorPane {
 
     @FXML public void initialize() {
 
-        //tabContent = (AnchorPane) self.getParent();
-        /*parentProperty().addListener(new ChangeListener() {
-
-            @Override
-            public void changed(ObservableValue observable,
-                                Object oldValue, Object newValue) {
-                tabContent = (AnchorPane) getParent();
+        dragableNode.setOnMousePressed(event -> {
+            // Rechtklick -> neues Fenster?
+            if(event.getButton() == MouseButton.SECONDARY) {
 
             }
-
-        });*/
+            // Linksklick -> Focus für Tabellenanzeige
+            else if(event.getButton() == MouseButton.PRIMARY) {
+                //mainWindowController.setFocusedNode(self);
+                if(mainWindowController.focusedNode != null) mainWindowController.focusedNode.getStyleClass().remove("node-focus");
+                mainWindowController.focusedNode = self;
+                mainWindowController.focusedNode.getStyleClass().add("node-focus");
+                mainWindowController.showTable();
+            }
+        });
 
         setNodeDragHandlers();
         setNodeLinkHandlers();
 
+        // Elternelement verknüpfen -> kann nur ein Elternknoten haben
         leftDragPane.setOnDragDetected(mLinkHandleDragDetected);
-        rightDragPane.setOnDragDetected(mLinkHandleDragDetected);
+        //leftDragPane.setOnDragDropped(mLinkHandleDragDropped);
+        dragableNode.setOnDragDropped(mLinkHandleDragDropped);
 
-        leftDragPane.setOnDragDropped(mLinkHandleDragDropped);
-        rightDragPane.setOnDragDropped(mLinkHandleDragDropped);
+        // Kindknoten verknüpfen -> kann mehrere Kindknoten haben
+        rightDragPane.setOnDragDetected(mLinkHandleDragDetected);
+        //rightDragPane.setOnDragDropped(mLinkHandleDragDropped);
+        dragableNode.setOnDragDropped(mLinkHandleDragDropped);
 
         mDragLink = new NodeLink();
         mDragLink.setVisible(false);
 
         //tabContent = (AnchorPane) self.getParent();
-
-        dragableNode.setOnMouseClicked(event -> {
-            setFocused(true);
-            System.out.println("new Focus");
-
-        });
 
     }
 
@@ -143,12 +152,12 @@ public class DraggableNode extends AnchorPane {
             //}
         };
 
-        // Knoten entfernen beim Drücken auf X
+        // Knoten entfernen beim Drücken auf X /TODO nur beim entfernten Knoten verschwindet die ID aus der Liste
         deleteNodeLabel.setOnMouseClicked(event -> {
             AnchorPane parent = (AnchorPane) self.getParent();
             parent.getChildren().remove(self);
 
-            // Verbindungen entfernen
+            // Grafische Verbindungen entfernen
             for (ListIterator<String> iterId = linkedChildren.listIterator();
                  iterId.hasNext();) {
 
@@ -169,9 +178,19 @@ public class DraggableNode extends AnchorPane {
                 iterId.remove();
             }
 
+            // Bei den Kindknoten den Vermerk des Elternknotens entfernen
+
+            // Bei Elternknoten sich selbst entfernen
+
         });
 
-        nodeLabel.getStyleClass().add("text-field");
+        nodeTextField.getStyleClass().add("text-field");
+        nodeTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+
+            setLabel(newValue);
+
+
+        });
 
         moveNodeLabel.setOnDragDetected(event -> {
 
@@ -284,6 +303,9 @@ public class DraggableNode extends AnchorPane {
 
             @Override
             public void handle(DragEvent event) {
+
+
+
                 event.acceptTransferModes(TransferMode.ANY);
 
                 //Relocate end of user-draggable link
@@ -326,6 +348,6 @@ public class DraggableNode extends AnchorPane {
     }
 
     public void setLabel(String label) {
-        nodeLabel.setText(label);
+        nodeTextField.setText(label);
     }
 }

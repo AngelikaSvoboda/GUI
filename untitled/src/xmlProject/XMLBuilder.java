@@ -1,21 +1,22 @@
-package sample;
+package xmlProject;
 
 
 import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
-import com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory;
 import com.sun.org.apache.xerces.internal.xs.XSLoader;
 import com.sun.org.apache.xerces.internal.xs.XSModel;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.xml.sax.SAXException;
 
-import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +31,30 @@ public class XMLBuilder {
     private Document document;
     private Element root;
 
+    public File getXmlFile() {
+        return xmlFile;
+    }
 
-    public XMLBuilder(){
+    public void setXmlFile(File xmlFile) {
+        this.xmlFile = xmlFile;
+    }
+
+    private File xmlFile;
+
+    public File getSchema() {
+        return schema;
+    }
+
+    public void setSchema(File schema) {
+        this.schema = schema;
+    }
+
+    private File schema;
+
+    /**
+     * Konstruktor ohne File
+     */
+    public XMLBuilder() {
         dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setIgnoringComments(true);
         dbFactory.setIgnoringElementContentWhitespace(true);
@@ -46,17 +69,36 @@ public class XMLBuilder {
         }
     }
 
-    public XMLBuilder(File schema){
+    public XMLBuilder(File file){
         this();
-        dbFactory.setValidating(true);
-        //dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaLanguage","http://www.w3.org/2001/XMLSchema");
+        xmlFile = file;
+        try {
+            document = dBuilder.parse(file);
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        //dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaSource", schema.getAbsolutePath());
+    }
+
+    public XMLBuilder(File file, File schema){
+        this(file);
+        this.schema = schema;
+        dbFactory.setValidating(true);
+        dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaLanguage","http://www.w3.org/2001/XMLSchema");
+
+        dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaSource", schema.getAbsolutePath());
 
         try {
             dBuilder = dbFactory.newDocumentBuilder();
+            dBuilder.parse(file);
 
         } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -66,6 +108,7 @@ public class XMLBuilder {
     }
 
     public Element readFile(File file) {
+        xmlFile = file;
         try {
             Document document = dBuilder.parse(file);
             document.getDocumentElement().normalize();
@@ -76,6 +119,22 @@ public class XMLBuilder {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void saveFile(){
+        Transformer transformer = null;
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer();
+            Result output = new StreamResult(new File("output.xml"));
+            Source input = new DOMSource(root);
+
+            transformer.transform(input, output);
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public boolean validateSchema(File inputSchema) {
@@ -117,12 +176,19 @@ public class XMLBuilder {
 
     }
 
-    public Element removeElement(String elementName){
-        return null;
+    public Element removeElement(String elementName, int number){
+        NodeList targets = document.getElementsByTagName(elementName);
+        return (Element) root.removeChild(targets.item(number));
     }
 
     public Attr removeAttribute(Element element, String attrType){
-        return null;
+        if(element.hasAttribute(attrType)) {
+            Attr attr = element.getAttributeNode(attrType);
+            element.removeAttribute(attrType);
+            return attr;
+        }
+        else
+            return null;
     }
 
     public Element createTestXML(){

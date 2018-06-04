@@ -1,10 +1,8 @@
-package sample;
+package xmlProject;
 
-import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.*;
 
 import java.io.File;
