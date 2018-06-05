@@ -58,9 +58,11 @@ public class CustomTab extends Tab{
         scrollBarV.setOrientation(Orientation.VERTICAL);*/
 
         treeContent = new AnchorPane();
+
         scrollPane.setContent(treeContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
+
 
         //treeContent.getChildren().add(scrollBarV);
 
@@ -114,8 +116,10 @@ public class CustomTab extends Tab{
 
                     }
 
-                    if (source != null && target != null)
+                    if (source != null && target != null) {
                         link.bindEnds(source, target);
+                        source.getElement().appendChild(target.getElement());
+                    }
                 }
 
             }
@@ -147,7 +151,7 @@ public class CustomTab extends Tab{
         MenuItem item = new MenuItem("Neuer Knoten");
         item.setOnAction(event -> {
 
-            DraggableNode node = new DraggableNode(mainWindowController);
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder);
             node.tabContent=treeContent;
 
             //Point point = MouseInfo.getPointerInfo().getLocation();
@@ -201,7 +205,7 @@ public class CustomTab extends Tab{
             if (currElement instanceof Element){
                 String name = ((Element) currElement).getTagName();
                 System.out.println("Tagname: " + name);
-                DraggableNode dNode = new DraggableNode(mainWindowController);
+                DraggableNode dNode = new DraggableNode(mainWindowController, xmlBuilder);
                 dNode.tabContent = treeContent;
                 if(currElement.hasAttributes()) {
                     // Attribute anfügen als Knoten/in Tabelle?
@@ -244,12 +248,15 @@ public class CustomTab extends Tab{
         if(root!=null) {
             point2D.add(20, 20);
             String label = root.getTagName();
-            DraggableNode node = new DraggableNode(mainWindowController);
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder);
             node.tabContent = treeContent;
             node.setLabel(label);
 
             treeContent.getChildren().add(node);
             node.relocateToPoint(point2D);
+
+            node.setElement(root);
+            node.xmlBuilder = xmlBuilder;
 
             if(root.hasChildNodes()) {
                 NodeList children = root.getChildNodes();
@@ -272,9 +279,12 @@ public class CustomTab extends Tab{
             Node currentNode = list.item(i);
             if(currentNode.getNodeType() == Node.ELEMENT_NODE) {
                 String label = ((Element) currentNode).getTagName();
-                dNode = new DraggableNode(mainWindowController);
+                dNode = new DraggableNode(mainWindowController, xmlBuilder);
                 dNode.tabContent = treeContent;
                 dNode.setLabel(label);
+
+                dNode.xmlBuilder = xmlBuilder;
+                dNode.setElement((Element)currentNode);
 
                 treeContent.getChildren().add(dNode);
 

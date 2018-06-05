@@ -10,6 +10,8 @@ import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 
 import javafx.event.EventHandler;
+import org.w3c.dom.Element;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -45,6 +47,7 @@ public class DraggableNode extends AnchorPane {
     private Point2D mDragOffset = new Point2D(0.0,0.0);
 
     private NodeLink mDragLink = null;
+
     //Parent = Inhalt des Tabs
     AnchorPane tabContent = null;
 
@@ -54,12 +57,15 @@ public class DraggableNode extends AnchorPane {
     // Referenz auf Elternknoten wenn vorhanden
     private DraggableNode parent;
 
-    TableViewContent tableViewContent = new TableViewContent();
+    // Referenz auf das Element in dem DOM zur Manipulation von Attributen und Eltern-/Kindbeziehungen
+    private Element element;
+    XMLBuilder xmlBuilder;
 
+    TableViewContent tableViewContent = new TableViewContent();
 
     private final DraggableNode self;
 
-    public DraggableNode(Controller c) {
+    public DraggableNode(Controller c, XMLBuilder builder) {
 
         mainWindowController = c;
 
@@ -67,6 +73,8 @@ public class DraggableNode extends AnchorPane {
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         self = this;
+        xmlBuilder = builder;
+        element = xmlBuilder.createElement("Label");
         try {
             fxmlLoader.load();
 
@@ -113,6 +121,15 @@ public class DraggableNode extends AnchorPane {
 
         //tabContent = (AnchorPane) self.getParent();
 
+    }
+
+
+    public Element getElement() {
+        return element;
+    }
+
+    public void setElement(Element element) {
+        this.element = element;
     }
 
     public void relocateToPoint (Point2D p) {
@@ -182,6 +199,7 @@ public class DraggableNode extends AnchorPane {
 
             // Bei Elternknoten sich selbst entfernen
 
+
         });
 
         nodeTextField.getStyleClass().add("text-field");
@@ -223,10 +241,12 @@ public class DraggableNode extends AnchorPane {
 
     public void setNodeLinkHandlers() {
 
+        // Link wird zum ersten Mal gezogen
         mLinkHandleDragDetected = new EventHandler <MouseEvent> () {
 
             @Override
             public void handle(MouseEvent event) {
+                System.out.println("link handle drag detected");
 
                 getParent().setOnDragOver(null);
                 getParent().setOnDragDropped(null);
@@ -263,10 +283,12 @@ public class DraggableNode extends AnchorPane {
             }
         };
 
+        // Link wird über den Knoten gezogen -> Speichern des Links zum späteren Einfügen als ClipboardContent auf dem tabContent
         mLinkHandleDragDropped = new EventHandler <DragEvent> () {
 
             @Override
             public void handle(DragEvent event) {
+                System.out.println("link handle dropped");
 
                 getParent().setOnDragOver(null);
                 getParent().setOnDragDropped(null);
@@ -299,12 +321,12 @@ public class DraggableNode extends AnchorPane {
             }
         };
 
+        // Link wird über den Bildschirm gezogen -> aktualisiere den Endpunkt der Linie zur Darstellung
         mContextLinkDragOver = new EventHandler <DragEvent> () {
 
             @Override
             public void handle(DragEvent event) {
-
-
+                System.out.println("context link drag over");
 
                 event.acceptTransferModes(TransferMode.ANY);
 
@@ -319,7 +341,7 @@ public class DraggableNode extends AnchorPane {
             }
         };
 
-        //drop event for link creation
+        // Link wird losgelassen, entferne die erstellte Linie
         mContextLinkDragDropped = new EventHandler <DragEvent> () {
 
             @Override

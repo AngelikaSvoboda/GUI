@@ -28,7 +28,7 @@ public class XMLBuilder {
 
     SchemaFactory schemaFactory;
 
-    private Document document;
+    Document document;
     private Element root;
 
     public File getXmlFile() {
@@ -155,6 +155,10 @@ public class XMLBuilder {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public Element createElement(String name){
+        return document.createElement(name);
     }
 
     public void addElement(Element parent, String eName){

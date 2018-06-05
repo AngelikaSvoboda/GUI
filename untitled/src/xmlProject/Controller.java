@@ -174,13 +174,19 @@ public class Controller{
 
     }
 
-    public void handleSave() {
+    private CustomTab getOpenedTab() {
         SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+        CustomTab tab = null;
         Tab openendTab = selectionModel.getSelectedItem();
         if(openendTab instanceof CustomTab) {
-            CustomTab tab = (CustomTab) openendTab;
-            //TabPane p = (TabPane) tab.getContent();
-            //Tab treeTab = p.getTabs().get(0);
+            tab = (CustomTab) openendTab;
+        }
+        return tab;
+    }
+
+    public void handleSave() {
+        CustomTab tab = getOpenedTab();
+        if(tab !=null) {
             XMLBuilder b = tab.getXmlBuilder();
             b.saveFile();
         }
@@ -201,7 +207,8 @@ public class Controller{
                     item.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
-                            DraggableNode node = new DraggableNode(Controller.this);
+                            DraggableNode node = new DraggableNode(Controller.this, getOpenedTab().getXmlBuilder());
+
                             rightSidePanel.getChildren().add(node);
                         }
                     });
