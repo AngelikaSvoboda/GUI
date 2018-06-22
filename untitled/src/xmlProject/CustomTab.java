@@ -28,7 +28,7 @@ public class CustomTab extends Tab{
 
     private int height = 1;
 
-    private AnchorPane treeContent;
+    AnchorPane treeContent;
 
     private XMLBuilder xmlBuilder;
 
@@ -151,7 +151,7 @@ public class CustomTab extends Tab{
         MenuItem item = new MenuItem("Neuer Knoten");
         item.setOnAction(event -> {
 
-            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder);
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder, "Label");
             node.tabContent=treeContent;
 
             //Point point = MouseInfo.getPointerInfo().getLocation();
@@ -205,7 +205,7 @@ public class CustomTab extends Tab{
             if (currElement instanceof Element){
                 String name = ((Element) currElement).getTagName();
                 System.out.println("Tagname: " + name);
-                DraggableNode dNode = new DraggableNode(mainWindowController, xmlBuilder);
+                DraggableNode dNode = new DraggableNode(mainWindowController, xmlBuilder, name);
                 dNode.tabContent = treeContent;
                 if(currElement.hasAttributes()) {
                     // Attribute anfügen als Knoten/in Tabelle?
@@ -248,7 +248,7 @@ public class CustomTab extends Tab{
         if(root!=null) {
             point2D.add(20, 20);
             String label = root.getTagName();
-            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder);
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder, label);
             node.tabContent = treeContent;
             node.setLabel(label);
 
@@ -256,6 +256,7 @@ public class CustomTab extends Tab{
             node.relocateToPoint(point2D);
 
             node.setElement(root);
+            node.isRoot = true;
             node.xmlBuilder = xmlBuilder;
 
             if(root.hasChildNodes()) {
@@ -279,7 +280,7 @@ public class CustomTab extends Tab{
             Node currentNode = list.item(i);
             if(currentNode.getNodeType() == Node.ELEMENT_NODE) {
                 String label = ((Element) currentNode).getTagName();
-                dNode = new DraggableNode(mainWindowController, xmlBuilder);
+                dNode = new DraggableNode(mainWindowController, xmlBuilder, label);
                 dNode.tabContent = treeContent;
                 dNode.setLabel(label);
 

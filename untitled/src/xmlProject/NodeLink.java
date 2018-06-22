@@ -111,8 +111,8 @@ public class NodeLink extends AnchorPane{
         node_link.endYProperty().bind(
                 Bindings.add(target.layoutYProperty(), (target.getWidth() / 2.0)));
 
-        source.registerLink (getId());
-        target.registerLink (getId());
+        source.registerChildLink (getId());
+        target.registerParentLink (getId());
     }
 
 }

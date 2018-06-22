@@ -10,6 +10,8 @@ import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 
 import javafx.event.EventHandler;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
@@ -19,12 +21,14 @@ public class DraggableNode extends AnchorPane {
 
     private Controller mainWindowController;
 
-    @FXML private AnchorPane dragableNode;
+    @FXML private AnchorPane draggableNode;
+    @FXML private GridPane gridPane;
+    @FXML private HBox hBox;
 
     // Name des Elements
     @FXML private TextField nodeTextField;
 
-    @FXML private Label moveNodeLabel;
+    @FXML Label moveNodeLabel;
     @FXML private Label deleteNodeLabel;
 
     @FXML AnchorPane leftDragPane;
@@ -52,20 +56,24 @@ public class DraggableNode extends AnchorPane {
     AnchorPane tabContent = null;
 
     ArrayList<String>linkedChildren = new ArrayList<>();
+    String linkedParent;
     ArrayList<String>linkedAttributes = new ArrayList<>(); //nötig?
 
     // Referenz auf Elternknoten wenn vorhanden
-    private DraggableNode parent;
+    private DraggableNode parentNode;
 
     // Referenz auf das Element in dem DOM zur Manipulation von Attributen und Eltern-/Kindbeziehungen
     private Element element;
     XMLBuilder xmlBuilder;
 
+    boolean isRoot = false;
+
     TableViewContent tableViewContent = new TableViewContent();
 
     private final DraggableNode self;
 
-    public DraggableNode(Controller c, XMLBuilder builder) {
+
+    public DraggableNode(Controller c, XMLBuilder builder, String elementName) {
 
         mainWindowController = c;
 
@@ -74,7 +82,7 @@ public class DraggableNode extends AnchorPane {
         fxmlLoader.setController(this);
         self = this;
         xmlBuilder = builder;
-        element = xmlBuilder.createElement("Label");
+        element = xmlBuilder.createElement(elementName);
         try {
             fxmlLoader.load();
 
@@ -86,9 +94,10 @@ public class DraggableNode extends AnchorPane {
 
     }
 
+
     @FXML public void initialize() {
 
-        dragableNode.setOnMousePressed(event -> {
+        draggableNode.setOnMousePressed(event -> {
             // Rechtklick -> neues Fenster?
             if(event.getButton() == MouseButton.SECONDARY) {
 
@@ -109,12 +118,15 @@ public class DraggableNode extends AnchorPane {
         // Elternelement verknüpfen -> kann nur ein Elternknoten haben
         leftDragPane.setOnDragDetected(mLinkHandleDragDetected);
         //leftDragPane.setOnDragDropped(mLinkHandleDragDropped);
-        dragableNode.setOnDragDropped(mLinkHandleDragDropped);
+        draggableNode.setOnDragDropped(mLinkHandleDragDropped);
 
         // Kindknoten verknüpfen -> kann mehrere Kindknoten haben
         rightDragPane.setOnDragDetected(mLinkHandleDragDetected);
+        /*rightDragPane.setOnDragDetected(event -> {
+
+        });*/
         //rightDragPane.setOnDragDropped(mLinkHandleDragDropped);
-        dragableNode.setOnDragDropped(mLinkHandleDragDropped);
+        draggableNode.setOnDragDropped(mLinkHandleDragDropped);
 
         mDragLink = new NodeLink();
         mDragLink.setVisible(false);
@@ -123,6 +135,11 @@ public class DraggableNode extends AnchorPane {
 
     }
 
+
+    public void setRoot() {
+        gridPane.getChildren().remove(deleteNodeLabel);
+        leftDragPane.setVisible(false);
+    }
 
     public Element getElement() {
         return element;
@@ -188,7 +205,14 @@ public class DraggableNode extends AnchorPane {
                     if (node.getId() == null)
                         continue;
 
-                    if (node.getId().equals(id))
+                    if (node.getId().equals(id)) {
+                        iterNode.remove();
+                        DraggableNode child = (DraggableNode) node;
+                        //child.parentNode = null; TODO
+                    }
+
+                    // evtl. Elternknotenverbindung entfernen
+                    if(node.getId().equals(linkedParent))
                         iterNode.remove();
                 }
 
@@ -198,7 +222,7 @@ public class DraggableNode extends AnchorPane {
             // Bei den Kindknoten den Vermerk des Elternknotens entfernen
 
             // Bei Elternknoten sich selbst entfernen
-
+            xmlBuilder.removeElement(element);
 
         });
 
@@ -206,6 +230,11 @@ public class DraggableNode extends AnchorPane {
         nodeTextField.textProperty().addListener((observable, oldValue, newValue) -> {
 
             setLabel(newValue);
+            //element.setTextContent(newValue);
+            xmlBuilder.document.renameNode(element, element.getNamespaceURI(), newValue);
+
+            System.out.println("");
+            //xmlBuilder.document.a
 
 
         });
@@ -365,8 +394,11 @@ public class DraggableNode extends AnchorPane {
 
     }
 
-    public void registerLink(String id) {
+    public void registerChildLink(String id) {
         linkedChildren.add(id);
+    }
+    public void registerParentLink(String id) {
+        linkedParent = id;
     }
 
     public void setLabel(String label) {

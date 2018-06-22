@@ -84,6 +84,7 @@ public class Controller{
             //fxmlLoader.setLocation();
 
             Scene scene = new Scene(fxmlLoader.load(), 405, 148);
+            scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
             Stage stage = new Stage();
             stage.setTitle("New XML File");
             stage.initStyle(StageStyle.UTILITY);
@@ -101,6 +102,11 @@ public class Controller{
 
                     if(!fileText.endsWith(".xml")) fileText +=".xml";
                     CustomTab tab= new CustomTab(Controller.this,fileText);
+                    DraggableNode root = new DraggableNode(this, new XMLBuilder(), dialogController.getRootTextField());
+                    root.setLabel(dialogController.getRootTextField());
+                    root.tabContent = tab.treeContent;
+                    root.setRoot();
+                    tab.treeContent.getChildren().add(root);
 
                     // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
                     if(dialogController.isCheckBoxEnabled() &&
@@ -116,6 +122,7 @@ public class Controller{
                     }
                     tab.setClosable(true);
                     tabPane.getTabs().add(tab);
+
 
                 }
                 if(event.getSource() instanceof Button) {
@@ -167,7 +174,6 @@ public class Controller{
             XMLBuilder builder =tab.getXmlBuilder();
             Element root = builder.readFile(choice);
 
-
             tabPane.getTabs().add(tab);
             tab.showXML(root);
         }
@@ -207,7 +213,7 @@ public class Controller{
                     item.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
-                            DraggableNode node = new DraggableNode(Controller.this, getOpenedTab().getXmlBuilder());
+                            DraggableNode node = new DraggableNode(Controller.this, getOpenedTab().getXmlBuilder(), "Label");
 
                             rightSidePanel.getChildren().add(node);
                         }
@@ -246,6 +252,7 @@ public class Controller{
 
     public void handleAddAttribute(ActionEvent actionEvent) {
         focusedNode.tableViewContent.addRow("attr", "val");
+        focusedNode.getElement().setAttribute("attr", "val");
 
         nodeContentTableView.setItems(focusedNode.tableViewContent.getRows());
 

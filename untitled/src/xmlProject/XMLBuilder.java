@@ -184,6 +184,9 @@ public class XMLBuilder {
         NodeList targets = document.getElementsByTagName(elementName);
         return (Element) root.removeChild(targets.item(number));
     }
+    public Element removeElement(Element element) {
+        return (Element) document.removeChild(element);
+    }
 
     public Attr removeAttribute(Element element, String attrType){
         if(element.hasAttribute(attrType)) {

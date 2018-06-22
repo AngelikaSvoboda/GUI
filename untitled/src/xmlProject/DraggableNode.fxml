@@ -13,7 +13,7 @@
 <fx:root fx:id="dragableNode" prefHeight="51.0" prefWidth="90.0" styleClass="dragicon" stylesheets="@style.css" type="javafx.scene.layout.AnchorPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox prefHeight="50.0" prefWidth="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <GridPane prefHeight="30.0" prefWidth="80.0" styleClass="node-overlay">
+         <GridPane fx:id="gridPane" prefHeight="30.0" prefWidth="80.0" styleClass="node-overlay">
             <columnConstraints>
                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="57.0" minWidth="17.0" prefWidth="17.0" />
                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="65.0" minWidth="25.0" prefWidth="56.0" />
@@ -33,7 +33,7 @@
                
             </children>
          </GridPane>
-         <HBox prefHeight="21.0" prefWidth="90.0" styleClass="icon-blue">
+         <HBox fx:id="hBox" prefHeight="21.0" prefWidth="90.0" styleClass="icon-blue">
             <children>
                <AnchorPane fx:id="leftDragPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="left-link-handle" />
                <AnchorPane fx:id="contentPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />

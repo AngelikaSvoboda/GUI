@@ -16,8 +16,7 @@ public class NewFileDialog{
 
     //@FXML AnchorPane rootNewFileDialog;
     @FXML private TextField fileTextField;
-
-
+    @FXML private TextField rootTextField;
 
     private String schemaFilePath;
 
@@ -36,6 +35,13 @@ public class NewFileDialog{
     public void initialize() {
         checkBoxValue = schemaCheckBox.isSelected();
         selectSchemaButton.setDisable(true);
+
+        fileTextField.textProperty().addListener(observable -> {
+            fileTextField.getStyleClass().remove("error");
+        });
+        rootTextField.textProperty().addListener(observable -> {
+            rootTextField.getStyleClass().remove("error");
+        });
 
     }
     public boolean isWindowCancelled() {
@@ -57,6 +63,8 @@ public class NewFileDialog{
     public void setFileTextField(String text) {
         fileTextField.setText(text);
     }
+
+    public String getRootTextField() { return rootTextField.getText(); }
 
     public void handleCheckBox(ActionEvent actionEvent) {
         schemaCheckBox.setSelected(!checkBoxValue);
@@ -88,6 +96,7 @@ public class NewFileDialog{
         }
     }
 
+
     public void handleCancel(ActionEvent actionEvent) {
         windowCancelled=true;
         Stage stage = (Stage) cancelButton.getScene().getWindow();
@@ -96,16 +105,22 @@ public class NewFileDialog{
 
     public void handleCreateFile(ActionEvent actionEvent) {
         windowCancelled = false;
+
+        if(getFileText().isEmpty() || getRootTextField().isEmpty()) {
+            if(getFileText().isEmpty()) fileTextField.getStyleClass().add("error");
+            if(getRootTextField().isEmpty()) rootTextField.getStyleClass().add("error");
+        }
+
         // Schema einlesen und Elemente in das Contextmenu aufnehmen
         if(checkBoxValue) {
 
         }
         // ohne Schema: leeres XML erzeugen, Schema anlegen(?)
-        else if(!fileTextField.getText().isEmpty()){
-
+        else if(!getFileText().isEmpty() && !getRootTextField().isEmpty()){
+            Stage stage = (Stage) cancelButton.getScene().getWindow();
+            stage.close();
 
         }
-        Stage stage = (Stage) cancelButton.getScene().getWindow();
-        stage.close();
+
     }
 }
