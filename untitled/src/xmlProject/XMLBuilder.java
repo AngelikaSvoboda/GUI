@@ -107,6 +107,10 @@ public class XMLBuilder {
         return root;
     }
 
+    public void setRoot(Element element) {
+        root = element;
+    }
+
     public Element readFile(File file) {
         xmlFile = file;
         try {
@@ -125,6 +129,7 @@ public class XMLBuilder {
         Transformer transformer = null;
         try {
             transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             Result output = new StreamResult(new File("output.xml"));
             Source input = new DOMSource(root);
 
@@ -185,7 +190,13 @@ public class XMLBuilder {
         return (Element) root.removeChild(targets.item(number));
     }
     public Element removeElement(Element element) {
-        return (Element) document.removeChild(element);
+        try {
+            return (Element) document.removeChild(element);
+        }
+        catch (Exception e) {
+
+        }
+        return null;
     }
 
     public Attr removeAttribute(Element element, String attrType){

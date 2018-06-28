@@ -1,5 +1,6 @@
 package xmlProject;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -10,12 +11,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
+import javafx.util.Callback;
 import org.w3c.dom.Element;
 
 import java.io.File;
@@ -39,6 +42,8 @@ public class Controller{
     @FXML private Button editAttributeButton;
     @FXML private Button deleteAttributeButton;
 
+    private EventHandler<TableColumn.CellEditEvent<Attribute, String>> handleEditCell;
+
     public DraggableNode focusedNode;
 
     public Controller(){
@@ -55,8 +60,53 @@ public class Controller{
                         )
                 );
 
+        handleEditCell = new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<Attribute, String> t) {
+                ((Attribute) t.getTableView().getItems().get(
+                        t.getTablePosition().getRow())
+                ).setAttribute(t.getNewValue());
+            }
+        };
+
         tableColumnAttribute.setCellValueFactory(new PropertyValueFactory<Attribute,String>("Attribute"));
         tableColumnValue.setCellValueFactory(new PropertyValueFactory<Attribute,String>("Value"));
+
+        Callback<TableColumn, TableCell> cellFactory =
+                new Callback<TableColumn, TableCell>() {
+                    public TableCell call(TableColumn p) {
+                        return new EditCell();
+                    }
+                };
+
+
+
+        //tableColumnAttribute.setCellFactory(TextFieldTableCell.forTableColumn());
+        tableColumnAttribute.setCellFactory(new TextFieldCellFactory());
+        /*tableColumnAttribute.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<Attribute, String> t) {
+                        ((Attribute) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setAttribute(t.getNewValue());
+                    }
+                }
+        );*/
+
+        //tableColumnAttribute.setOnEditCancel(handleEditCell);
+
+        tableColumnValue.setCellFactory(new TextFieldCellFactory());
+        /*tableColumnValue.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<Attribute, String> t) {
+                        ((Attribute) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setValue(t.getNewValue());
+                    }
+                }
+        );*/
 
         Image image = new Image(getClass().getResourceAsStream("/Images/addButton1.png"));
         addAttributeButton.setGraphic(new ImageView(image));
@@ -102,10 +152,12 @@ public class Controller{
 
                     if(!fileText.endsWith(".xml")) fileText +=".xml";
                     CustomTab tab= new CustomTab(Controller.this,fileText);
-                    DraggableNode root = new DraggableNode(this, new XMLBuilder(), dialogController.getRootTextField());
+                    DraggableNode root = new DraggableNode(this, tab.getXmlBuilder(), dialogController.getRootTextField());
                     root.setLabel(dialogController.getRootTextField());
                     root.tabContent = tab.treeContent;
                     root.setRoot();
+                    tab.getXmlBuilder().setRoot(root.getElement());
+
                     tab.treeContent.getChildren().add(root);
 
                     // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
@@ -235,6 +287,9 @@ public class Controller{
         nodeContentTableView.setItems(list);
 
     }
+    public void emptyTable() {
+        nodeContentTableView.getItems().removeAll(nodeContentTableView.getItems());
+    }
 
 
     public TreeItem<String> getNodesForDirectory(File directory) { //Returns a TreeItem representation of the specified directory
@@ -251,11 +306,11 @@ public class Controller{
     }
 
     public void handleAddAttribute(ActionEvent actionEvent) {
-        focusedNode.tableViewContent.addRow("attr", "val");
+
+
+        focusedNode.tableViewContent.addRow("attr", "val"); //TODO Feld ist leer?
         focusedNode.getElement().setAttribute("attr", "val");
-
         nodeContentTableView.setItems(focusedNode.tableViewContent.getRows());
-
     }
 
     public void handleEditAttribute(ActionEvent actionEvent) {
@@ -263,6 +318,7 @@ public class Controller{
 
     public void handleDeleteAttribute(ActionEvent actionEvent) {
         Attribute a = nodeContentTableView.getSelectionModel().getSelectedItem();
+        focusedNode.tableViewContent.deleteRow(nodeContentTableView.getSelectionModel().getFocusedIndex());
         nodeContentTableView.getItems().remove(a);
     }
 }

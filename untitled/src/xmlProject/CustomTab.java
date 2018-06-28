@@ -38,6 +38,9 @@ public class CustomTab extends Tab{
     public CustomTab(Controller c, String text) {
         super(text);
         mainWindowController = c;
+        setOnClosed(event -> {
+            mainWindowController.emptyTable();
+        });
 
         xmlBuilder = new XMLBuilder();
         System.out.println("new CustomTab");
@@ -119,6 +122,7 @@ public class CustomTab extends Tab{
                     if (source != null && target != null) {
                         link.bindEnds(source, target);
                         source.getElement().appendChild(target.getElement());
+                        System.out.println("kindknoten anhängen");
                     }
                 }
 
@@ -161,7 +165,6 @@ public class CustomTab extends Tab{
             //node.relocateToPoint(new Point2D(point.getX(),point.getY()));
             node.relocateToPoint(point2D);
 
-            //TODO neues XML Element erstellen
         });
         contextMenu.getItems().add(item);
 
@@ -194,7 +197,7 @@ public class CustomTab extends Tab{
         xmlBuilder.setSchema(schema);
     }
 
-    public DraggableNode showXML(Element root, int depth) {
+    /*public DraggableNode showXML(Element root, int depth) {
         Node currElement = root;
         DraggableNode rootDraggableNode = null;
 
@@ -242,7 +245,7 @@ public class CustomTab extends Tab{
             currElement = currElement.getNextSibling(); //nächstes Kind
         }
         return rootDraggableNode;
-    }
+    }*/
 
     public void showXML(Element root) {
         if(root!=null) {

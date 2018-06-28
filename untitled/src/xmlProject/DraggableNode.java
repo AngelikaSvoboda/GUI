@@ -139,6 +139,7 @@ public class DraggableNode extends AnchorPane {
     public void setRoot() {
         gridPane.getChildren().remove(deleteNodeLabel);
         leftDragPane.setVisible(false);
+
     }
 
     public Element getElement() {
@@ -207,7 +208,7 @@ public class DraggableNode extends AnchorPane {
 
                     if (node.getId().equals(id)) {
                         iterNode.remove();
-                        DraggableNode child = (DraggableNode) node;
+                        //DraggableNode child = (DraggableNode) node;
                         //child.parentNode = null; TODO
                     }
 
@@ -217,6 +218,21 @@ public class DraggableNode extends AnchorPane {
                 }
 
                 iterId.remove();
+            }
+
+            if(!linkedParent.isEmpty()) {
+                for (ListIterator<Node> iterNode = parent.getChildren().listIterator();
+                     iterNode.hasNext(); ) {
+
+                    Node node = iterNode.next();
+
+                    if (node.getId() == null)
+                        continue;
+
+                    // evtl. Elternknotenverbindung entfernen
+                    if (node.getId().equals(linkedParent))
+                        iterNode.remove();
+                }
             }
 
             // Bei den Kindknoten den Vermerk des Elternknotens entfernen

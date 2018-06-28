@@ -1,5 +1,6 @@
 package xmlProject;
 
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -14,6 +15,7 @@ public class TableViewContent {
 
     public void addRow(String attr, String value) {
         Attribute a = new Attribute(attr,value);
+
         rows.add(a);
     }
 

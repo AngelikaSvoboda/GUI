@@ -113,6 +113,8 @@ public class NodeLink extends AnchorPane{
 
         source.registerChildLink (getId());
         target.registerParentLink (getId());
+
+        //source.xmlBuilder.addElement(target.getElement(), source.getElement().getTagName());
     }
 
 }
