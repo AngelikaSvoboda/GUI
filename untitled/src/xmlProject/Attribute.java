@@ -4,10 +4,10 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class Attribute {
 
-    //private String attribute;
-    //private String value;
-    private SimpleStringProperty attributeProperty;
-    private SimpleStringProperty valueProperty;
+    private String attribute;
+    private String value;
+    //private SimpleStringProperty attributeProperty;
+    //private SimpleStringProperty valueProperty;
 
     public Attribute(){
         //attribute = "";
@@ -15,13 +15,13 @@ public class Attribute {
     }
 
     public Attribute(String attr, String val){
-        //attribute = attr;
-        //value = val;
-        setAttributeProperty(attr);
-        setValueProperty(val);
+        attribute = attr;
+        value = val;
+        //setAttributeProperty(attr);
+        //setValueProperty(val);
     }
 
-    public String getAttributeProperty() {
+    /*public String getAttributeProperty() {
         return attributeProperty.get();
     }
 
@@ -44,9 +44,11 @@ public class Attribute {
     public void setValueProperty(String valueProperty) {
         this.valueProperty.set(valueProperty);
     }
+    */
 
     public String getAttribute() {
-        return attributeProperty.get();
+        //return attributeProperty.get();
+        return  attribute;
     }
 
     public void setAttribute(String attribute) {

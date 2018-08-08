@@ -35,6 +35,7 @@ public class CustomTab extends Tab{
     // Aus Schema/DTD oder vorhandener xml-Datei definierte Tags speichern
     private ArrayList xmlNodes = new ArrayList<String>();
 
+    // Neue leere xml-Datei
     public CustomTab(Controller c, String text) {
         super(text);
         mainWindowController = c;
@@ -43,6 +44,8 @@ public class CustomTab extends Tab{
         });
 
         xmlBuilder = new XMLBuilder();
+        //xmlBuilder.setXmlFile(new File(text));
+
         System.out.println("new CustomTab");
         TabPane tabPane = new TabPane();
         tabPane.setSide(Side.BOTTOM);
@@ -168,7 +171,7 @@ public class CustomTab extends Tab{
         });
         contextMenu.getItems().add(item);
 
-        MenuItem item1 = new MenuItem("Testdatei");
+        /*MenuItem item1 = new MenuItem("Testdatei");
         item1.setOnAction(event -> {
             XMLBuilder builder = new XMLBuilder();
             Element root = builder.createTestXML();
@@ -176,16 +179,34 @@ public class CustomTab extends Tab{
             showXML(root);
         });
 
-        contextMenu.getItems().add(item1);
+        contextMenu.getItems().add(item1);*/
 
         this.setContent(pane);
 
 
     }
 
+    // Öffnen einer xml-Datei oder neue leere Datei mit Schema/DTD
     public CustomTab(Controller c, String text, File file) {
         this(c, text);
-        //xmlBuilder = new XMLBuilder(file);
+        if(file.getName().endsWith(".xml")) {
+            xmlBuilder = new XMLBuilder(file);
+            xmlBuilder.readFile(file);
+        }
+        else {
+            //xmlBuilder = new XMLBuilder(); // Bereits im oberen Konstruktor
+            //xmlBuilder = new XMLBuilder(null, file);
+            xmlBuilder.setSchema(file);
+            xmlBuilder.validateSchema(file);
+
+        }
+    }
+    // Öffnen einer Datei mit Schema/DTD
+    public CustomTab(Controller c, String text, File file, File schema) {
+        this(c, text);
+        //xmlBuilder = new XMLBuilder(file, schema);
+        xmlBuilder.setSchema(schema);
+        xmlBuilder.validateSchema(schema);
         xmlBuilder.readFile(file);
     }
 
@@ -195,57 +216,9 @@ public class CustomTab extends Tab{
 
     public void setSchema(File schema) {
         xmlBuilder.setSchema(schema);
+
+
     }
-
-    /*public DraggableNode showXML(Element root, int depth) {
-        Node currElement = root;
-        DraggableNode rootDraggableNode = null;
-
-        while(currElement!=null) {
-            Node children = currElement.getFirstChild();
-            NodeList childrenList = currElement.getChildNodes();
-
-            if (currElement instanceof Element){
-                String name = ((Element) currElement).getTagName();
-                System.out.println("Tagname: " + name);
-                DraggableNode dNode = new DraggableNode(mainWindowController, xmlBuilder, name);
-                dNode.tabContent = treeContent;
-                if(currElement.hasAttributes()) {
-                    // Attribute anfügen als Knoten/in Tabelle?
-                }
-                dNode.setLabel(name);
-
-                treeContent.getChildren().add(dNode);
-
-
-                Point2D point = new Point2D(point2D.getX() + depth*offsetX, point2D.getY() + height*offsetY);
-                height++;
-                dNode.relocateToPoint(point);
-                if(children!=null) {
-                    if(children.getNodeType() != Node.ELEMENT_NODE)
-
-                    //childrenList.getLength();
-                    rootDraggableNode = showXML((Element) children, depth+1);
-                    NodeLink link = new NodeLink();
-
-                    //link.setStart(new Point2D(dNode.rightDragPane.getLayoutX(),dNode.rightDragPane.getLayoutY()));
-                    //link.setEnd(new Point2D(rootDraggableNode.leftDragPane.getLayoutX(), rootDraggableNode.leftDragPane.getLayoutY()));
-                    link.bindEnds(dNode,rootDraggableNode);
-
-                    treeContent.getChildren().add(0,link);
-                    //link.setVisible(true);
-
-                }
-                else {
-                    rootDraggableNode = dNode;
-                }
-
-
-            }
-            currElement = currElement.getNextSibling(); //nächstes Kind
-        }
-        return rootDraggableNode;
-    }*/
 
     public void showXML(Element root) {
         if(root!=null) {

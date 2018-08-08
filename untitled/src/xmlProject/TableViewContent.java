@@ -19,6 +19,26 @@ public class TableViewContent {
         rows.add(a);
     }
 
+    public void setRow(int row, String attr, String value){
+        setAttribute(row, attr);
+        setValue(row, value);
+    }
+
+    public void setAttribute(int row, String attr) {
+        rows.get(row).setAttribute(attr);
+        Attribute a = rows.get(row);
+        a.setAttribute(attr);
+        rows.set(row, a);
+    }
+
+    public void setValue(int row, String value) {
+        rows.get(row).setValue(value);
+        Attribute a = rows.get(row);
+        a.setValue(value);
+        rows.set(row, a);
+
+    }
+
     public void deleteRow(int index) {
         rows.remove(index);
     }

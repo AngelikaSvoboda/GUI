@@ -9,6 +9,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -19,8 +21,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
 import javafx.util.Callback;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,34 +85,40 @@ public class Controller{
 
 
 
-        //tableColumnAttribute.setCellFactory(TextFieldTableCell.forTableColumn());
-        tableColumnAttribute.setCellFactory(new TextFieldCellFactory());
-        /*tableColumnAttribute.setOnEditCommit(
+        tableColumnAttribute.setCellFactory(TextFieldTableCell.forTableColumn());
+        //tableColumnAttribute.setCellFactory(new TextFieldCellFactory());
+        tableColumnAttribute.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<Attribute, String> t) {
-                        ((Attribute) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setAttribute(t.getNewValue());
+                        Attribute a = t.getTableView().getItems().get(
+                                t.getTablePosition().getRow());
+                        a.setAttribute(t.getNewValue());
+                        System.out.println("" + t.getNewValue());
+                        focusedNode.tableViewContent.setAttribute(t.getTablePosition().getRow(), t.getNewValue());
                     }
                 }
-        );*/
+        );
 
-        //tableColumnAttribute.setOnEditCancel(handleEditCell);
 
-        tableColumnValue.setCellFactory(new TextFieldCellFactory());
-        /*tableColumnValue.setOnEditCommit(
+        //tableColumnValue.setCellFactory(new TextFieldCellFactory());
+        tableColumnValue.setCellFactory(TextFieldTableCell.forTableColumn());
+        tableColumnValue.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<Attribute, String> t) {
+                        Attribute a = t.getTableView().getItems().get(
+                                t.getTablePosition().getRow());
                         ((Attribute) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setValue(t.getNewValue());
+
+                        focusedNode.tableViewContent.setValue(t.getTablePosition().getRow(), t.getNewValue());
                     }
                 }
-        );*/
+        );
 
-        Image image = new Image(getClass().getResourceAsStream("/Images/addButton1.png"));
+                Image image = new Image(getClass().getResourceAsStream("/Images/addButton1.png"));
         addAttributeButton.setGraphic(new ImageView(image));
         Image image1 = new Image(getClass().getResourceAsStream("/Images/editButton1.png"));
         editAttributeButton.setGraphic(new ImageView(image1));
@@ -151,8 +161,29 @@ public class Controller{
                 if(!dialogController.isWindowCancelled()) {
 
                     if(!fileText.endsWith(".xml")) fileText +=".xml";
-                    CustomTab tab= new CustomTab(Controller.this,fileText);
-                    DraggableNode root = new DraggableNode(this, tab.getXmlBuilder(), dialogController.getRootTextField());
+                    CustomTab tab;
+                    DraggableNode root;
+
+
+                    // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
+                    if(dialogController.isCheckBoxEnabled() &&
+                            !dialogController.getFileText().isEmpty()) {
+                        System.out.println("Neue Datei mit Schema");
+                        File schema = new File(dialogController.getSchemaFilePath());
+                        tab = new CustomTab(Controller.this, fileText, schema);
+                        root = new DraggableNode(this, tab.getXmlBuilder(), dialogController.getRootTextField());
+                        //File schema = new File(dialogController.getSchemaFilePath());
+                        //tab = new CustomTab(Controller.this, fileText);
+                        tab.setSchema(schema);
+
+                    }
+                    // Ohne Schema
+                    else {
+                        System.out.println("Neue Datei");
+                        tab = new CustomTab(Controller.this,fileText);
+                        root = new DraggableNode(this, tab.getXmlBuilder(), dialogController.getRootTextField());
+                    }
+
                     root.setLabel(dialogController.getRootTextField());
                     root.tabContent = tab.treeContent;
                     root.setRoot();
@@ -160,18 +191,6 @@ public class Controller{
 
                     tab.treeContent.getChildren().add(root);
 
-                    // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
-                    if(dialogController.isCheckBoxEnabled() &&
-                            !dialogController.getFileText().isEmpty()) {
-                        System.out.println("Neue Datei mit Schema");
-                        File schema = new File(dialogController.getSchemaFilePath());
-                        //tab = new CustomTab(Controller.this, fileText);
-                        tab.setSchema(schema);
-                    }
-                    // Ohne Schema
-                    else {
-                        System.out.println("Neue Datei");
-                    }
                     tab.setClosable(true);
                     tabPane.getTabs().add(tab);
 
@@ -203,8 +222,8 @@ public class Controller{
         File choice = dc.showDialog(openProjectMenu.getParentPopup().getScene().getWindow());
         if(choice == null || ! choice.isDirectory()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Could not open directory");
-            alert.setContentText("The file is invalid.");
+            alert.setHeaderText("Verzeichnis konnte nicht geöffnet werden.");
+            alert.setContentText("Die Verzeichnis ist ungültig.");
 
             alert.showAndWait();
         } else {
@@ -246,12 +265,34 @@ public class Controller{
         CustomTab tab = getOpenedTab();
         if(tab !=null) {
             XMLBuilder b = tab.getXmlBuilder();
-            b.saveFile();
+            String s =b.saveFile(getOpenedTab().getText(), openFileMenu.getParentPopup().getScene().getWindow());
+            if(!s.equals(tab.getText()))
+                tab.setText(s);
         }
 
 
     }
     public void handleSaveAs(){
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Speichern unter");
+        CustomTab tab = getOpenedTab();
+        if(tab!=null) {
+            File originalFile = getOpenedTab().getXmlBuilder().getXmlFile();
+            chooser.setInitialDirectory(originalFile);
+            chooser.setInitialFileName(tab.getText());
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML-File .xml" , "*.xml"));
+            File choice = chooser.showSaveDialog(openProjectMenu.getParentPopup().getScene().getWindow());
+            if (choice != null) {
+                tab.getXmlBuilder().saveFileAs(choice);
+            }
+        }
+        else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Speichern fehlgeschlagen");
+            alert.setContentText("Es ist keine Datei zum Speichern geöffnet.");
+
+            alert.showAndWait();
+        }
 
     }
 
@@ -308,7 +349,7 @@ public class Controller{
     public void handleAddAttribute(ActionEvent actionEvent) {
 
 
-        focusedNode.tableViewContent.addRow("attr", "val"); //TODO Feld ist leer?
+        focusedNode.tableViewContent.addRow("attr", "val");
         focusedNode.getElement().setAttribute("attr", "val");
         nodeContentTableView.setItems(focusedNode.tableViewContent.getRows());
     }
@@ -320,5 +361,44 @@ public class Controller{
         Attribute a = nodeContentTableView.getSelectionModel().getSelectedItem();
         focusedNode.tableViewContent.deleteRow(nodeContentTableView.getSelectionModel().getFocusedIndex());
         nodeContentTableView.getItems().remove(a);
+    }
+
+    public void handleStartAdler() {
+        /*ProcessBuilder pb = new ProcessBuilder("java", "-jar", "adler/adler_v1.jar");
+        File file = new File("C:\\Program Files (x86)\\Java\\jre1.8.0_171\\bin");
+        //pb.directory(new File("adler"));
+        pb.directory(file);
+        try {
+            Process p = pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        System.out.println("Adler starten");
+        File file = new File("C:\\Users\\Angi\\IdeaProjects\\untitled\\src\\adler\\adler_v1.jar");
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(file.getAbsolutePath());
+
+        /*
+        try {
+            Runtime.getRuntime().exec("java -jar " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
+        /*try {
+            File file = new File("adler/adler_v1.jar");
+            Runtime.getRuntime().exec("java", new String[] {"-jar"}, file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 }

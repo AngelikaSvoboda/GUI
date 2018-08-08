@@ -1,9 +1,12 @@
 package xmlProject;
 
 
+import com.sun.org.apache.xerces.internal.impl.dv.XSSimpleType;
 import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
-import com.sun.org.apache.xerces.internal.xs.XSLoader;
-import com.sun.org.apache.xerces.internal.xs.XSModel;
+import com.sun.org.apache.xerces.internal.xs.*;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,6 +34,19 @@ public class XMLBuilder {
     Document document;
     private Element root;
 
+    private File xmlFile;
+    private File schema;
+
+    private String filePath;
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     public File getXmlFile() {
         return xmlFile;
     }
@@ -39,7 +55,7 @@ public class XMLBuilder {
         this.xmlFile = xmlFile;
     }
 
-    private File xmlFile;
+
 
     public File getSchema() {
         return schema;
@@ -47,9 +63,10 @@ public class XMLBuilder {
 
     public void setSchema(File schema) {
         this.schema = schema;
+
     }
 
-    private File schema;
+
 
     /**
      * Konstruktor ohne File
@@ -90,15 +107,30 @@ public class XMLBuilder {
 
         dbFactory.setAttribute("http://java.sun.com/xml/jaxp/ properties/schemaSource", schema.getAbsolutePath());
 
+
+
         try {
             dBuilder = dbFactory.newDocumentBuilder();
             dBuilder.parse(file);
+
+            System.setProperty(DOMImplementationRegistry.PROPERTY, "com.sun.org.apache.xerces.internal.dom.DOMXSImplementationSourceImpl");
+            DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+            com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl impl = (XSImplementationImpl) registry.getDOMImplementation("XS-Loader");
+            XSLoader schemaLoader = impl.createXSLoader(null);
+            XSModel model = schemaLoader.loadURI(schema.getAbsolutePath());
+            System.out.println("Schemamodel geladen");
 
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -125,12 +157,58 @@ public class XMLBuilder {
         return null;
     }
 
-    public void saveFile(){
+    public String saveFile(String filename, Window w){
+        String returnName=filename;
+        System.out.println("Speichern");
+        Transformer transformer = null;
+
+        // Neue Datei: Speicherort wählen und neues File erstellen
+        if(xmlFile == null) {
+            System.out.println("Speicherort wählen");
+            FileChooser chooser = new FileChooser();
+            chooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            chooser.setTitle("Speichern");
+            chooser.setInitialFileName(filename);
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML-File .xml" , "*.xml"));
+
+            File choice = chooser.showSaveDialog(w);
+            if(choice != null) {
+                xmlFile = new File(choice.getAbsolutePath());
+                filePath = xmlFile.getAbsolutePath();
+                if(choice.getName() != filename) {
+                    returnName = choice.getName();
+                }
+            }
+            else {
+                return filename;
+            }
+        }
+
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            //Result output = new StreamResult(new File("output.xml"));
+            Result output = new StreamResult(xmlFile);
+            Source input = new DOMSource(root);
+
+            transformer.transform(input, output);
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+        return returnName;
+
+    }
+
+    public void saveFileAs(File newFile) {
         Transformer transformer = null;
         try {
             transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            Result output = new StreamResult(new File("output.xml"));
+            xmlFile = newFile;
+            filePath = newFile.getAbsolutePath();
+            Result output = new StreamResult(newFile);
             Source input = new DOMSource(root);
 
             transformer.transform(input, output);
@@ -151,6 +229,14 @@ public class XMLBuilder {
             com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl impl = (XSImplementationImpl) registry.getDOMImplementation("XS-Loader");
             XSLoader schemaLoader = impl.createXSLoader(null);
             XSModel model = schemaLoader.loadURI(inputSchema.getAbsolutePath());
+            XSNamedMap map =  model.getComponents(XSConstants.ELEMENT_DECLARATION); // gibt nur das oberste Element?
+            for (int i=0; i< map.size(); i++){
+                XSObject o = map.item(i);
+                if(o!=null) {
+                    System.out.println(o.getName());
+                }
+            }
+            System.out.println("");
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

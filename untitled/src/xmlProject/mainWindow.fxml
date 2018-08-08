@@ -31,6 +31,7 @@
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="saveMenuButton" mnemonicParsing="false" onAction="#handleSave" text="Speichern" />
                   <MenuItem fx:id="saveAsButton" mnemonicParsing="false" onAction="#handleSaveAs" text="Speichern unter..." />
+                  <MenuItem mnemonicParsing="false" onAction="#handleStartAdler" text="AdLeR starten..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" text="Close" />
             </items>

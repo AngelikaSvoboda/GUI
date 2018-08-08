@@ -113,7 +113,8 @@ public class NewFileDialog{
 
         // Schema einlesen und Elemente in das Contextmenu aufnehmen
         if(checkBoxValue) {
-
+            Stage stage = (Stage) cancelButton.getScene().getWindow();
+            stage.close();
         }
         // ohne Schema: leeres XML erzeugen, Schema anlegen(?)
         else if(!getFileText().isEmpty() && !getRootTextField().isEmpty()){
