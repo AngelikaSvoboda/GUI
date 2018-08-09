@@ -96,6 +96,9 @@ public class Controller{
                         a.setAttribute(t.getNewValue());
                         System.out.println("" + t.getNewValue());
                         focusedNode.tableViewContent.setAttribute(t.getTablePosition().getRow(), t.getNewValue());
+                        focusedNode.linkedAttributes.set(t.getTablePosition().getRow(), a);
+                        focusedNode.refreshAttributes();
+
                     }
                 }
         );
@@ -114,6 +117,8 @@ public class Controller{
                         ).setValue(t.getNewValue());
 
                         focusedNode.tableViewContent.setValue(t.getTablePosition().getRow(), t.getNewValue());
+                        focusedNode.linkedAttributes.set(t.getTablePosition().getRow(), a);
+                        focusedNode.refreshAttributes();
                     }
                 }
         );
@@ -350,7 +355,9 @@ public class Controller{
 
 
         focusedNode.tableViewContent.addRow("attr", "val");
-        focusedNode.getElement().setAttribute("attr", "val");
+        //focusedNode.getElement().setAttribute("attr", "val");
+        focusedNode.linkedAttributes.add(new Attribute("attr", "val"));
+        focusedNode.refreshAttributes();
         nodeContentTableView.setItems(focusedNode.tableViewContent.getRows());
     }
 
@@ -359,7 +366,10 @@ public class Controller{
 
     public void handleDeleteAttribute(ActionEvent actionEvent) {
         Attribute a = nodeContentTableView.getSelectionModel().getSelectedItem();
-        focusedNode.tableViewContent.deleteRow(nodeContentTableView.getSelectionModel().getFocusedIndex());
+        int index = nodeContentTableView.getSelectionModel().getFocusedIndex();
+        focusedNode.tableViewContent.deleteRow(index);
+        focusedNode.linkedAttributes.remove(index);
+        focusedNode.refreshAttributes();
         nodeContentTableView.getItems().remove(a);
     }
 

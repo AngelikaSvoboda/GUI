@@ -12,7 +12,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.event.EventHandler;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 import java.io.IOException;
 import java.util.*;
@@ -57,7 +59,7 @@ public class DraggableNode extends AnchorPane {
 
     ArrayList<String>linkedChildren = new ArrayList<>();
     String linkedParent;
-    ArrayList<String>linkedAttributes = new ArrayList<>(); //nötig?
+    ArrayList<Attribute> linkedAttributes = new ArrayList<>(); // Zwischenspeichern der Attribute, bevor sie dem Element hinzugefügt werden
 
     // Referenz auf Elternknoten wenn vorhanden
     private DraggableNode parentNode;
@@ -419,5 +421,19 @@ public class DraggableNode extends AnchorPane {
 
     public void setLabel(String label) {
         nodeTextField.setText(label);
+    }
+
+    public void refreshAttributes() {
+        // Vorhandene Elemente entfernen
+        if(element.hasAttributes()) {
+            NamedNodeMap map = element.getAttributes();
+            for(int i=0; i< map.getLength(); i++) {
+                element.removeAttribute(map.item(i).getNodeName());
+            }
+        }
+        // Liste neu hinzufügen
+        for(int i=0; i<linkedAttributes.size(); i++) {
+            element.setAttribute(linkedAttributes.get(i).getAttribute(), linkedAttributes.get(i).getValue());
+        }
     }
 }

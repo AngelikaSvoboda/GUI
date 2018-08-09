@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="XmlProject:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/XmlProject_jar</output-path>
+    <root id="archive" name="XmlProject.jar">
+      <element id="module-output" name="XmlProject" />
+    </root>
+  </artifact>
+</component>
