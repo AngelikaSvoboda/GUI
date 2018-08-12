@@ -161,7 +161,7 @@ public class Controller{
 
             stage.setOnHidden(event -> {
                 String fileText = dialogController.getFileText();
-                System.out.println(dialogController.isWindowCancelled());
+                //System.out.println(dialogController.isWindowCancelled());
 
                 if(!dialogController.isWindowCancelled()) {
 
@@ -172,7 +172,7 @@ public class Controller{
 
                     // Einbinden einer Schema aktiviert und Datei ausgewählt -> Schema validieren
                     if(dialogController.isCheckBoxEnabled() &&
-                            !dialogController.getFileText().isEmpty()) {
+                            !dialogController.getSchemaFilePath().isEmpty()) {
                         System.out.println("Neue Datei mit Schema");
                         File schema = new File(dialogController.getSchemaFilePath());
                         tab = new CustomTab(Controller.this, fileText, schema);

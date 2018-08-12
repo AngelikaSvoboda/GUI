@@ -18,7 +18,7 @@ public class NewFileDialog{
     @FXML private TextField fileTextField;
     @FXML private TextField rootTextField;
 
-    private String schemaFilePath;
+    private String schemaFilePath = "";
 
     @FXML private CheckBox schemaCheckBox;
 
@@ -109,6 +109,9 @@ public class NewFileDialog{
         if(getFileText().isEmpty() || getRootTextField().isEmpty()) {
             if(getFileText().isEmpty()) fileTextField.getStyleClass().add("error");
             if(getRootTextField().isEmpty()) rootTextField.getStyleClass().add("error");
+        }
+        if(checkBoxValue && getSchemaFilePath().isEmpty()) {
+            selectSchemaButton.getStyleClass().add("error");
         }
 
         // Schema einlesen und Elemente in das Contextmenu aufnehmen
