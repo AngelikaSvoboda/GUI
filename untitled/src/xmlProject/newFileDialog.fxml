@@ -25,13 +25,13 @@
         </rowConstraints>
          <children>
             <TextField fx:id="fileTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-            <Label text="Input file name" />
-            <CheckBox fx:id="schemaCheckBox" mnemonicParsing="false" onAction="#handleCheckBox" prefHeight="17.0" prefWidth="159.0" text="use Schema (.xsd/.dtd)" GridPane.rowIndex="1" />
-            <Button fx:id="selectSchemaButton" disable="true" mnemonicParsing="false" onAction="#handleSelectSchema" prefHeight="25.0" prefWidth="238.0" text="Select..." GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-            <Label text="root name" GridPane.rowIndex="2" />
-            <TextField fx:id="rootTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-            <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#handleCancel" prefHeight="25.0" prefWidth="100.0" text="Cancel" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-            <Button fx:id="createFileButton" defaultButton="true" mnemonicParsing="false" onAction="#handleCreateFile" prefHeight="25.0" prefWidth="100.0" text="Create File" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+            <Label prefHeight="17.0" prefWidth="61.0" text="Dateiname" />
+            <CheckBox fx:id="schemaCheckBox" mnemonicParsing="false" onAction="#handleCheckBox" prefHeight="17.0" prefWidth="159.0" text="Schema (.xsd/.dtd)" GridPane.rowIndex="1" />
+            <Button fx:id="selectSchemaButton" disable="true" mnemonicParsing="false" onAction="#handleSelectSchema" prefHeight="25.0" prefWidth="238.0" text="Durchsuchen..." GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+            <Label prefHeight="17.0" prefWidth="81.0" text="root-Elelemet" GridPane.rowIndex="2" />
+            <TextField fx:id="rootTextField" text="course" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+            <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#handleCancel" prefHeight="25.0" prefWidth="100.0" text="Abbrechen" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+            <Button fx:id="createFileButton" defaultButton="true" mnemonicParsing="false" onAction="#handleCreateFile" prefHeight="25.0" prefWidth="100.0" text="Erstellen" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
          </children>
       </GridPane>
    </children>

@@ -34,6 +34,7 @@ public class Controller{
     @FXML private TreeView<String> projectTreeView;
     @FXML private MenuItem openProjectMenu;
     @FXML private MenuItem openFileMenu;
+    @FXML private MenuItem closeMenu;
 
     @FXML private TabPane tabPane;
     @FXML private VBox rightSidePanel;
@@ -46,9 +47,10 @@ public class Controller{
     @FXML private Button editAttributeButton;
     @FXML private Button deleteAttributeButton;
 
-    private EventHandler<TableColumn.CellEditEvent<Attribute, String>> handleEditCell;
+    //private EventHandler<TableColumn.CellEditEvent<Attribute, String>> handleEditCell;
 
     public DraggableNode focusedNode;
+    //public DraggableNode copyElement;
 
     public Controller(){
 
@@ -64,14 +66,14 @@ public class Controller{
                         )
                 );
 
-        handleEditCell = new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
+        /*handleEditCell = new EventHandler<TableColumn.CellEditEvent<Attribute, String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<Attribute, String> t) {
                 ((Attribute) t.getTableView().getItems().get(
                         t.getTablePosition().getRow())
                 ).setAttribute(t.getNewValue());
             }
-        };
+        };*/
 
         tableColumnAttribute.setCellValueFactory(new PropertyValueFactory<Attribute,String>("Attribute"));
         tableColumnValue.setCellValueFactory(new PropertyValueFactory<Attribute,String>("Value"));
@@ -133,9 +135,9 @@ public class Controller{
     }
 
     //Ordnersymbol der Projekts
-    private final Node rootProjectImg = new ImageView(
+    /*private final Node rootProjectImg = new ImageView(
             new Image(getClass().getResourceAsStream(""))
-    );
+    );*/
 
 
     /**
@@ -251,6 +253,7 @@ public class Controller{
             Element root = builder.readFile(choice);
 
             tabPane.getTabs().add(tab);
+            //tabPane.get
             tab.showXML(root);
         }
 
@@ -282,8 +285,16 @@ public class Controller{
         chooser.setTitle("Speichern unter");
         CustomTab tab = getOpenedTab();
         if(tab!=null) {
+
             File originalFile = getOpenedTab().getXmlBuilder().getXmlFile();
-            chooser.setInitialDirectory(originalFile);
+            // Es wurde noch nicht gespeichert
+            if(originalFile == null) {
+                handleSave();
+                return;
+            }
+            File dir = (originalFile.getParentFile());
+            chooser.setInitialDirectory(dir);
+
             chooser.setInitialFileName(tab.getText());
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML-File .xml" , "*.xml"));
             File choice = chooser.showSaveDialog(openProjectMenu.getParentPopup().getScene().getWindow());
@@ -304,8 +315,6 @@ public class Controller{
     public void handleMouseClicked() {
         rightSidePanel.setOnMouseClicked((event) -> {
                 if(event.getButton() == MouseButton.SECONDARY) {
-                    //Rectangle rect = new Rectangle(50,30);
-                    //rightSidePanel.getChildren().add(rect);
                     ContextMenu menu = new ContextMenu();
                     MenuItem item = new MenuItem("Neuer Knoten");
                     item.setOnAction(new EventHandler<ActionEvent>() {
@@ -316,7 +325,27 @@ public class Controller{
                             rightSidePanel.getChildren().add(node);
                         }
                     });
-                    menu.getItems().addAll();
+                    MenuItem chapter = new MenuItem("chapter");
+                    chapter.setOnAction(event1 -> {
+                        DraggableNode node = new DraggableNode(Controller.this, getOpenedTab().getXmlBuilder(), "chapter");
+                        node.tableViewContent.addRow("nr","0");
+                        rightSidePanel.getChildren().add(node);
+                    });
+                    MenuItem page = new MenuItem("page");
+                    page.setOnAction(event1 -> {
+                        DraggableNode node = new DraggableNode(Controller.this, getOpenedTab().getXmlBuilder(), "page");
+                        node.tableViewContent.addRow("title","");
+                        rightSidePanel.getChildren().add(node);
+                    });
+                    MenuItem content = new MenuItem("content");
+                    content.setOnAction(event1 -> {
+                        DraggableNode node = new DraggableNode(Controller.this, getOpenedTab().getXmlBuilder(), "content");
+                        node.tableViewContent.addRow("type","0");
+                        rightSidePanel.getChildren().add(node);
+                    });
+
+
+                    menu.getItems().addAll(item, chapter, page, content);
                     menu.show(rightSidePanel, event.getScreenX(), event.getSceneY());
 
                 }});
@@ -351,27 +380,6 @@ public class Controller{
         return root;
     }
 
-    public void handleAddAttribute(ActionEvent actionEvent) {
-
-
-        focusedNode.tableViewContent.addRow("attr", "val");
-        //focusedNode.getElement().setAttribute("attr", "val");
-        focusedNode.linkedAttributes.add(new Attribute("attr", "val"));
-        focusedNode.refreshAttributes();
-        nodeContentTableView.setItems(focusedNode.tableViewContent.getRows());
-    }
-
-    public void handleEditAttribute(ActionEvent actionEvent) {
-    }
-
-    public void handleDeleteAttribute(ActionEvent actionEvent) {
-        Attribute a = nodeContentTableView.getSelectionModel().getSelectedItem();
-        int index = nodeContentTableView.getSelectionModel().getFocusedIndex();
-        focusedNode.tableViewContent.deleteRow(index);
-        focusedNode.linkedAttributes.remove(index);
-        focusedNode.refreshAttributes();
-        nodeContentTableView.getItems().remove(a);
-    }
 
     public void handleStartAdler() {
         /*ProcessBuilder pb = new ProcessBuilder("java", "-jar", "adler/adler_v1.jar");
@@ -411,4 +419,50 @@ public class Controller{
             e.printStackTrace();
         }*/
     }
+
+    public void handleAddAttribute(ActionEvent actionEvent) {
+
+        if(focusedNode != null) {
+            focusedNode.tableViewContent.addRow("attr", "val");
+            //focusedNode.getElement().setAttribute("attr", "val");
+            focusedNode.linkedAttributes.add(new Attribute("attr", "val"));
+            focusedNode.refreshAttributes();
+            nodeContentTableView.setItems(focusedNode.tableViewContent.getRows());
+        }
+    }
+    /*
+        public void handleEditAttribute(ActionEvent actionEvent) {
+        }
+    */
+    public void handleDeleteAttribute(ActionEvent actionEvent) {
+        if(focusedNode != null) {
+            Attribute a = nodeContentTableView.getSelectionModel().getSelectedItem();
+            int index = nodeContentTableView.getSelectionModel().getFocusedIndex();
+            focusedNode.tableViewContent.deleteRow(index);
+            focusedNode.linkedAttributes.remove(index);
+            focusedNode.refreshAttributes();
+            nodeContentTableView.getItems().remove(a);
+        }
+    }
+
+    public void handleDeleteElement() {
+        if(focusedNode != null && !focusedNode.isRoot) {
+            focusedNode.deleteSelf();
+        }
+    }
+
+    public void handleClose() {
+        Stage stage = (Stage) addAttributeButton.getScene().getWindow();
+        stage.close();
+    }
+
+    /*
+    public void handleCopyElement() {
+        if(focusedNode!=null)
+            copyElement = focusedNode;
+    }
+
+    public DraggableNode getCopyElement() {
+        return copyElement;
+    }*/
 }

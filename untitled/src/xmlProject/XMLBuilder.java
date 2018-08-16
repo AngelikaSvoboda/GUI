@@ -276,11 +276,14 @@ public class XMLBuilder {
         return (Element) root.removeChild(targets.item(number));
     }
     public Element removeElement(Element element) {
+        // TODO DOM durchlaufen?
+        Element parent = (Element) element.getParentNode();
         try {
-            return (Element) document.removeChild(element);
+            if(parent != null)
+                return (Element) parent.removeChild(element);
         }
         catch (Exception e) {
-
+            e.printStackTrace();
         }
         return null;
     }

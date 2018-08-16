@@ -4,7 +4,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
@@ -23,7 +25,7 @@ public class DraggableNode extends AnchorPane {
 
     private Controller mainWindowController;
 
-    @FXML private AnchorPane draggableNode;
+    @FXML AnchorPane draggableNode;
     @FXML private GridPane gridPane;
     @FXML private HBox hBox;
 
@@ -58,7 +60,7 @@ public class DraggableNode extends AnchorPane {
     AnchorPane tabContent = null;
 
     ArrayList<String>linkedChildren = new ArrayList<>();
-    String linkedParent;
+    String linkedParent = "";
     ArrayList<Attribute> linkedAttributes = new ArrayList<>(); // Zwischenspeichern der Attribute, bevor sie dem Element hinzugefügt werden
 
     // Referenz auf Elternknoten wenn vorhanden
@@ -93,24 +95,34 @@ public class DraggableNode extends AnchorPane {
         }
 
         setId(UUID.randomUUID().toString());
+        setLabel(elementName);
 
     }
 
 
     @FXML public void initialize() {
+        ContextMenu menu = new ContextMenu();
 
-        draggableNode.setOnMousePressed(event -> {
-            // Rechtklick -> neues Fenster?
-            if(event.getButton() == MouseButton.SECONDARY) {
-
-            }
-            // Linksklick -> Focus für Tabellenanzeige
-            else if(event.getButton() == MouseButton.PRIMARY) {
+        draggableNode.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            // Focus für Tabellenanzeige
+            if(event.getButton() == MouseButton.PRIMARY /*|| event.getButton() == MouseButton.SECONDARY*/) {
                 //mainWindowController.setFocusedNode(self);
                 if(mainWindowController.focusedNode != null) mainWindowController.focusedNode.getStyleClass().remove("node-focus");
                 mainWindowController.focusedNode = self;
                 mainWindowController.focusedNode.getStyleClass().add("node-focus");
                 mainWindowController.showTable();
+                /*)
+                if(event.getButton() == MouseButton.SECONDARY) {
+                    System.out.println("HELP");
+                    MenuItem item = new MenuItem("Kopieren");
+                    item.setOnAction(event1 -> {
+                        mainWindowController.setCopyNode(this);
+                    });
+                    menu.getItems().add(item);
+                    menu.show(tabContent, event.getScreenX(), event.getScreenY());
+
+                }*/
+                event.consume();
             }
         });
 
@@ -118,7 +130,7 @@ public class DraggableNode extends AnchorPane {
         setNodeLinkHandlers();
 
         // Elternelement verknüpfen -> kann nur ein Elternknoten haben
-        leftDragPane.setOnDragDetected(mLinkHandleDragDetected);
+        //leftDragPane.setOnDragDetected(mLinkHandleDragDetected);
         //leftDragPane.setOnDragDropped(mLinkHandleDragDropped);
         draggableNode.setOnDragDropped(mLinkHandleDragDropped);
 
@@ -140,7 +152,8 @@ public class DraggableNode extends AnchorPane {
 
     public void setRoot() {
         gridPane.getChildren().remove(deleteNodeLabel);
-        leftDragPane.setVisible(false);
+        //leftDragPane.setVisible(false);
+        isRoot = true;
 
     }
 
@@ -191,58 +204,13 @@ public class DraggableNode extends AnchorPane {
 
         // Knoten entfernen beim Drücken auf X /TODO nur beim entfernten Knoten verschwindet die ID aus der Liste
         deleteNodeLabel.setOnMouseClicked(event -> {
-            AnchorPane parent = (AnchorPane) self.getParent();
-            parent.getChildren().remove(self);
-
-            // Grafische Verbindungen entfernen
-            for (ListIterator<String> iterId = linkedChildren.listIterator();
-                 iterId.hasNext();) {
-
-                String id = iterId.next();
-
-                for (ListIterator <Node> iterNode = parent.getChildren().listIterator();
-                     iterNode.hasNext();) {
-
-                    Node node = iterNode.next();
-
-                    if (node.getId() == null)
-                        continue;
-
-                    if (node.getId().equals(id)) {
-                        iterNode.remove();
-                        //DraggableNode child = (DraggableNode) node;
-                        //child.parentNode = null; TODO
-                    }
-
-                    // evtl. Elternknotenverbindung entfernen
-                    if(node.getId().equals(linkedParent))
-                        iterNode.remove();
-                }
-
-                iterId.remove();
-            }
-
-            if(!linkedParent.isEmpty()) {
-                for (ListIterator<Node> iterNode = parent.getChildren().listIterator();
-                     iterNode.hasNext(); ) {
-
-                    Node node = iterNode.next();
-
-                    if (node.getId() == null)
-                        continue;
-
-                    // evtl. Elternknotenverbindung entfernen
-                    if (node.getId().equals(linkedParent))
-                        iterNode.remove();
-                }
-            }
-
-            // Bei den Kindknoten den Vermerk des Elternknotens entfernen
-
-            // Bei Elternknoten sich selbst entfernen
-            xmlBuilder.removeElement(element);
+            if(event.getButton() == MouseButton.SECONDARY)
+                return;
+            else
+                deleteSelf();
 
         });
+
 
         nodeTextField.getStyleClass().add("text-field");
         nodeTextField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -284,6 +252,59 @@ public class DraggableNode extends AnchorPane {
 
         });
 
+    }
+
+    public void deleteSelf() {
+        AnchorPane parent = (AnchorPane) self.getParent();
+        parent.getChildren().remove(self);
+
+        // Grafische Verbindungen entfernen
+        for (ListIterator<String> iterId = linkedChildren.listIterator();
+             iterId.hasNext();) {
+
+            String id = iterId.next();
+
+            for (ListIterator <Node> iterNode = parent.getChildren().listIterator();
+                 iterNode.hasNext();) {
+
+                Node node = iterNode.next();
+
+                if (node.getId() == null)
+                    continue;
+
+                if (node.getId().equals(id)) {
+                    iterNode.remove();
+                    //DraggableNode child = (DraggableNode) node;
+                    //child.parentNode = null; TODO
+                }
+
+                // evtl. Elternknotenverbindung entfernen
+                if(node.getId().equals(linkedParent))
+                    iterNode.remove();
+            }
+
+            iterId.remove();
+        }
+
+        if(!linkedParent.isEmpty()) {
+            for (ListIterator<Node> iterNode = parent.getChildren().listIterator();
+                 iterNode.hasNext(); ) {
+
+                Node node = iterNode.next();
+
+                if (node.getId() == null)
+                    continue;
+
+                // evtl. Elternknotenverbindung entfernen
+                if (node.getId().equals(linkedParent))
+                    iterNode.remove();
+            }
+        }
+
+        // Bei den Kindknoten den Vermerk des Elternknotens entfernen
+
+        // Bei Elternknoten sich selbst entfernen
+        xmlBuilder.removeElement(element);
     }
 
     public void setNodeLinkHandlers() {
@@ -436,4 +457,5 @@ public class DraggableNode extends AnchorPane {
             element.setAttribute(linkedAttributes.get(i).getAttribute(), linkedAttributes.get(i).getValue());
         }
     }
+
 }

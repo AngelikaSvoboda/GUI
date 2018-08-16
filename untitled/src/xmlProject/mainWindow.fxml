@@ -33,17 +33,22 @@
                   <MenuItem fx:id="saveAsButton" mnemonicParsing="false" onAction="#handleSaveAs" text="Speichern unter..." />
                   <MenuItem mnemonicParsing="false" onAction="#handleStartAdler" text="AdLeR starten..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Close" />
+                  <MenuItem fx:id="closeMenu" mnemonicParsing="false" onAction="#handleClose" text="Schließen" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
+          <Menu mnemonicParsing="false" text="Bearbeiten">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+                  <Menu mnemonicParsing="false" text="Element">
+                    <items>
+                    <MenuItem mnemonicParsing="false" onAction="#handleDeleteElement" text="Löschen" />
+                    </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Attribut">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#handleAddAttribute" text="Hinzufügen" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleDeleteAttribute" text="Entfernen" />
+                    </items>
+                  </Menu>
             </items>
           </Menu>
         </menus>
@@ -77,7 +82,7 @@
                               <ToolBar prefHeight="42.0" prefWidth="122.0">
                                 <items>
                                   <Button fx:id="addAttributeButton" mnemonicParsing="false" onAction="#handleAddAttribute" prefHeight="25.0" prefWidth="25.0" />
-                                    <Button fx:id="editAttributeButton" mnemonicParsing="false" onAction="#handleEditAttribute" prefHeight="25.0" prefWidth="25.0" />
+                                    <Button fx:id="editAttributeButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" />
                                     <Button fx:id="deleteAttributeButton" mnemonicParsing="false" onAction="#handleDeleteAttribute" prefHeight="25.0" prefWidth="25.0" />
                                 </items>
                               </ToolBar>

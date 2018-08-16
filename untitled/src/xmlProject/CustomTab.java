@@ -5,15 +5,16 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.awt.event.KeyListener;
 import java.io.File;
+import java.security.Key;
 import java.util.ArrayList;
 
 public class CustomTab extends Tab{
@@ -27,6 +28,7 @@ public class CustomTab extends Tab{
     private static final int offsetY = 60;
 
     private int height = 1;
+    private int maxdepth = 1;
 
     AnchorPane treeContent;
 
@@ -55,6 +57,8 @@ public class CustomTab extends Tab{
         Tab treeTab = new Tab("Tree");
 
         ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
 
         treeTab.setContent(scrollPane);
 
@@ -65,26 +69,22 @@ public class CustomTab extends Tab{
 
         treeContent = new AnchorPane();
 
-        scrollPane.setContent(treeContent);
+
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
 
+        scrollPane.setPannable(true);
+
+        scrollPane.setContent(treeContent);
 
         //treeContent.getChildren().add(scrollBarV);
 
-        //kein Effekt?
-        /*scrollBarV.valueProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> ov,
-                                Number old_val, Number new_val) {
-                treeContent.setLayoutY(-new_val.doubleValue());
-            }
-        });
 
-
-        AnchorPane.setTopAnchor(scrollBarV,0.0);
-        AnchorPane.setRightAnchor(scrollBarV,0.0);
-        AnchorPane.setBottomAnchor(scrollBarV,11.0);
-        //treeContent.setLeftAnchor(scrollBarV,0.0);*/
+        AnchorPane.setTopAnchor(scrollPane,0.0);
+        AnchorPane.setRightAnchor(scrollPane,0.0);
+        AnchorPane.setBottomAnchor(scrollPane,0.0);
+        AnchorPane.setLeftAnchor(scrollPane, 0.0);
+        //treeContent.setLeftAnchor(scrollBarV,0.0);
 
         treeContent.setOnDragDone(event -> {
 
@@ -161,15 +161,51 @@ public class CustomTab extends Tab{
             DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder, "Label");
             node.tabContent=treeContent;
 
-            //Point point = MouseInfo.getPointerInfo().getLocation();
             treeContent.getChildren().add(node);
-
-
-            //node.relocateToPoint(new Point2D(point.getX(),point.getY()));
             node.relocateToPoint(point2D);
 
         });
-        contextMenu.getItems().add(item);
+        MenuItem chapter = new MenuItem("chapter");
+        chapter.setOnAction(event1 -> {
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder, "chapter");
+            node.tableViewContent.addRow("nr","1");
+            node.linkedAttributes.add(new Attribute("nr", "1"));
+            node.getElement().setAttribute("nr", "1");
+            node.tabContent=treeContent;
+            treeContent.getChildren().add(node);
+            node.relocateToPoint(point2D);
+        });
+        MenuItem page = new MenuItem("page");
+        page.setOnAction(event1 -> {
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder, "page");
+            node.tableViewContent.addRow("title","");
+            node.linkedAttributes.add(new Attribute("title", ""));
+            node.getElement().setAttribute("title", "");
+            node.tabContent=treeContent;
+            treeContent.getChildren().add(node);
+            node.relocateToPoint(point2D);
+        });
+        MenuItem content = new MenuItem("content");
+        content.setOnAction(event1 -> {
+            DraggableNode node = new DraggableNode(mainWindowController, xmlBuilder, "content");
+            node.tableViewContent.addRow("type","0");
+            node.linkedAttributes.add(new Attribute("type", "0"));
+            node.getElement().setAttribute("type", "0");
+            node.tabContent=treeContent;
+            treeContent.getChildren().add(node);
+            node.relocateToPoint(point2D);
+        });
+        /*if(mainWindowController.getCopyElement() != null) {
+            MenuItem copy = new MenuItem("Einfügen");
+            copy.setOnAction(event -> {
+                DraggableNode n = mainWindowController.getCopyElement();
+                treeContent.getChildren().add(n);
+                n.relocateToPoint(point2D);
+            });
+            contextMenu.getItems().add(copy);
+        }*/
+
+        contextMenu.getItems().addAll(item, chapter, page, content);
 
         /*MenuItem item1 = new MenuItem("Testdatei");
         item1.setOnAction(event -> {
@@ -183,6 +219,23 @@ public class CustomTab extends Tab{
 
         this.setContent(pane);
 
+        /*
+        KeyCombination copyKeys = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
+
+        treeContent.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+            if(copyKeys.match(event)) {
+                MenuItem copy = new MenuItem("Einfügen");
+                copy.setOnAction(event1 -> {
+                    DraggableNode n = mainWindowController.getCopyElement();
+                    treeContent.getChildren().add(n);
+                    n.relocateToPoint(point2D);
+                });
+                contextMenu.getItems().add(copy);
+
+                System.out.println("Kopieren");
+            }
+
+        });*/
 
     }
 
@@ -206,7 +259,7 @@ public class CustomTab extends Tab{
         this(c, text);
         //xmlBuilder = new XMLBuilder(file, schema);
         xmlBuilder.setSchema(schema);
-        xmlBuilder.validateSchema(schema);
+        //xmlBuilder.validateSchema(schema);
         xmlBuilder.readFile(file);
     }
 
@@ -216,7 +269,6 @@ public class CustomTab extends Tab{
 
     public void setSchema(File schema) {
         xmlBuilder.setSchema(schema);
-
 
     }
 
@@ -233,7 +285,21 @@ public class CustomTab extends Tab{
 
             node.setElement(root);
             node.isRoot = true;
+            node.setRoot();
             node.xmlBuilder = xmlBuilder;
+
+            if(root.hasAttributes()) {
+                NamedNodeMap attributeMap = root.getAttributes();
+                for(int j=0; j<attributeMap.getLength(); j++) {
+                    Node attribute = attributeMap.item(j);
+                    String attrName = attribute.getNodeName();
+                    String attrValue = attribute.getNodeValue();
+                    //Attribute a = new Attribute();
+                    node.tableViewContent.addRow(attrName,attrValue);
+
+                }
+            }
+
 
             if(root.hasChildNodes()) {
                 NodeList children = root.getChildNodes();
@@ -244,6 +310,8 @@ public class CustomTab extends Tab{
                     treeContent.getChildren().add(0,link);
                 }
             }
+            //treeContent.resize(height*offsetX, maxdepth*offsetY);
+
         }
     }
 
@@ -288,6 +356,7 @@ public class CustomTab extends Tab{
 
 
                 if(currentNode.hasChildNodes()) {
+                    if(depth+1 > maxdepth) maxdepth++;
                     ArrayList<DraggableNode> children = showChildNodes(currentNode.getChildNodes(), depth+1);
                     for(int k = 0; k < children.size(); k++) {
                         NodeLink link = new NodeLink();
